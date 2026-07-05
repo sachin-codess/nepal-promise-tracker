@@ -228,3 +228,88 @@ body {
   background: #f4f1ec; border-radius: 8px;
 }
 .modal-disclaimer h3 { margin-bottom: 5px; }
+
+/* ---------- party menu (chips row) ---------- */
+.party-menu {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-bottom: 20px;
+}
+.party-menu-label {
+  font-size: 13px; color: var(--muted); font-weight: 600;
+  align-self: center; margin-right: 4px;
+}
+.party-chip {
+  background: #fff; border: 1.5px solid var(--line);
+  color: var(--ink); font-family: inherit;
+  font-size: 13px; font-weight: 600;
+  padding: 6px 13px; border-radius: 999px; cursor: pointer;
+  transition: all 0.14s ease;
+  border-left-width: 4px;
+}
+.party-chip:hover { background: var(--paper); transform: translateY(-1px); }
+
+/* clickable party name on cards */
+.party-link {
+  background: none; border: none; padding: 0;
+  font: inherit; color: inherit; cursor: pointer;
+  text-decoration: underline; text-decoration-color: var(--line);
+  text-underline-offset: 2px;
+}
+.party-link:hover { text-decoration-color: currentColor; }
+
+/* ---------- party modal ---------- */
+.party-abbr { font-size: 18px; font-weight: 600; opacity: 0.7; }
+
+.party-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 10px; margin: 18px 0 6px;
+}
+.party-stat {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 12px 6px; background: #fff;
+  border: 1px solid var(--line); border-radius: 10px;
+}
+.party-stat-num {
+  font-family: "Besley", Georgia, serif;
+  font-size: 26px; font-weight: 900; color: var(--blue); line-height: 1;
+}
+.party-stat-label {
+  font-size: 11px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.4px; margin-top: 5px;
+}
+
+.party-pol-list { list-style: none; }
+.party-pol-list li {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px;
+  padding: 7px 0; border-bottom: 1px solid var(--line);
+}
+.party-pol-name { font-weight: 600; color: var(--ink); }
+.party-pol-pos { font-size: 13px; color: var(--muted); }
+
+.party-promise-list { list-style: none; }
+.party-promise {
+  padding: 13px 0; border-bottom: 1px solid var(--line);
+}
+.party-promise-top {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 6px;
+}
+.party-promise-cat {
+  font-size: 11px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.4px;
+}
+.party-promise-text {
+  font-style: italic; color: var(--ink);
+  font-size: 14.5px; margin-bottom: 6px;
+}
+.party-promise-meta {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 13px; color: var(--muted);
+}
+.party-promise-meta a {
+  color: var(--crimson); font-weight: 600; text-decoration: none;
+}
+.party-promise-meta a:hover { text-decoration: underline; }
+
+@media (max-width: 560px) {
+  .party-stats { grid-template-columns: repeat(2, 1fr); }
+}

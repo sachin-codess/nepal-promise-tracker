@@ -4,6 +4,7 @@ import StatsBar from "./components/StatsBar";
 import Controls from "./components/Controls";
 import PromiseCard from "./components/PromiseCard";
 import AboutModal from "./components/AboutModal";
+import PartyModal from "./components/PartyModal";
 
 export default function App() {
   const [promises, setPromises] = useState([]);
@@ -14,6 +15,7 @@ export default function App() {
   const [category, setCategory] = useState("All");
   const [status, setStatus] = useState("all");
   const [showAbout, setShowAbout] = useState(false);
+  const [activeParty, setActiveParty] = useState(null);
 
   // Load data once when the app opens.
   useEffect(() => {
@@ -41,6 +43,17 @@ export default function App() {
       return true;
     });
   }, [promises, search, category, status]);
+
+  // Unique parties present in the data, for the menu.
+  const parties = useMemo(() => {
+    const seen = new Map();
+    for (const p of promises) {
+      if (p.party && !seen.has(p.party)) {
+        seen.set(p.party, { name: p.party, color: p.party_color || "#1E3A5F", abbr: p.party_abbr || "" });
+      }
+    }
+    return [...seen.values()];
+  }, [promises]);
 
   return (
     <div className="app">
@@ -82,6 +95,22 @@ export default function App() {
 
       <StatsBar promises={promises} />
 
+      {parties.length > 0 && (
+        <div className="party-menu">
+          <span className="party-menu-label">Parties:</span>
+          {parties.map((pt) => (
+            <button
+              key={pt.name}
+              className="party-chip"
+              style={{ borderLeftColor: pt.color }}
+              onClick={() => setActiveParty(pt.name)}
+            >
+              {pt.abbr || pt.name}
+            </button>
+          ))}
+        </div>
+      )}
+
       <Controls
         search={search} setSearch={setSearch}
         category={category} setCategory={setCategory}
@@ -96,7 +125,7 @@ export default function App() {
         </p>
       ) : (
         <main className="grid">
-          {visible.map((p) => <PromiseCard key={p.id} p={p} />)}
+          {visible.map((p) => <PromiseCard key={p.id} p={p} onPartyClick={setActiveParty} />)}
         </main>
       )}
 
@@ -106,6 +135,7 @@ export default function App() {
       </footer>
 
       <AboutModal open={showAbout} onClose={() => setShowAbout(false)} />
+      <PartyModal party={activeParty} promises={promises} onClose={() => setActiveParty(null)} />
     </div>
   );
 }

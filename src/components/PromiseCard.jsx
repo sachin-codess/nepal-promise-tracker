@@ -7,7 +7,7 @@ function fmtDate(d) {
   });
 }
 
-export default function PromiseCard({ p }) {
+export default function PromiseCard({ p, onPartyClick }) {
   return (
     <article className="card">
       <div className="card-top">
@@ -16,7 +16,11 @@ export default function PromiseCard({ p }) {
           <div className="card-meta">
             {p.position}
             {p.party ? <span className="dot-sep">·</span> : null}
-            {p.party}
+            {p.party ? (
+              <button className="party-link" onClick={() => onPartyClick && onPartyClick(p.party)}>
+                {p.party}
+              </button>
+            ) : null}
           </div>
         </div>
         <StatusPennant status={p.status} />
