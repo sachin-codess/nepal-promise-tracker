@@ -396,3 +396,39 @@ body {
   padding: 0;
 }
 .card-timeline-btn:hover { text-decoration: underline; }
+
+/* Analytics donut */
+.an-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.an-center-num { font-size: 2rem; font-weight: 700; fill: #1E3A5F; }
+.an-center-label { font-size: 0.8rem; fill: #888; }
+.an-legend { list-style: none; margin: 0; padding: 0; min-width: 180px; }
+.an-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #eee;
+}
+.an-legend-item:last-child { border-bottom: none; }
+.an-swatch { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+.an-legend-label { flex: 1; font-size: 0.9rem; }
+.an-legend-val { font-size: 0.85rem; color: #555; font-variant-numeric: tabular-nums; }
+
+/* Analytics button in header */
+.analytics-btn {
+  background: none;
+  border: 1px solid #1E3A5F;
+  color: #1E3A5F;
+  border-radius: 6px;
+  padding: 0.4rem 0.75rem;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.analytics-btn:hover { background: #1E3A5F; color: #fff; }

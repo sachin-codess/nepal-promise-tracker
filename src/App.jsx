@@ -7,6 +7,7 @@ import AboutModal from "./components/AboutModal";
 import PartyModal from "./components/PartyModal";
 import PoliticianModal from "./components/PoliticianModal";
 import TimelineModal from "./components/TimelineModal";
+import AnalyticsModal from "./components/AnalyticsModal";
 
 export default function App() {
   const [promises, setPromises] = useState([]);
@@ -18,6 +19,7 @@ export default function App() {
   const [category, setCategory] = useState("All");
   const [status, setStatus] = useState("all");
   const [showAbout, setShowAbout] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
   const [activeParty, setActiveParty] = useState(null);
   const [activePolitician, setActivePolitician] = useState(null);
   const [timelinePromise, setTimelinePromise] = useState(null);
@@ -94,6 +96,9 @@ export default function App() {
             What was promised. What was delivered. With sources.
           </p>
         </div>
+        <button className="analytics-btn" onClick={() => setShowAnalytics(true)}>
+          Analytics
+        </button>
         <button className="about-btn" onClick={() => setShowAbout(true)}>
           About &amp; Methodology
         </button>
@@ -168,6 +173,7 @@ export default function App() {
       <PartyModal party={activeParty} promises={promises} onClose={() => setActiveParty(null)} />
       <PoliticianModal politician={activePolitician} promises={promises} onClose={() => setActivePolitician(null)} />
       <TimelineModal promise={timelinePromise} events={timelineEvents} onClose={() => setTimelinePromise(null)} />
+      <AnalyticsModal open={showAnalytics} promises={promises} onClose={() => setShowAnalytics(false)} />
     </div>
   );
 }
