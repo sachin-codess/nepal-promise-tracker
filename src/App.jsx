@@ -3,6 +3,7 @@ import { fetchPromises, isLiveDatabase } from "./lib/supabase";
 import StatsBar from "./components/StatsBar";
 import Controls from "./components/Controls";
 import PromiseCard from "./components/PromiseCard";
+import AboutModal from "./components/AboutModal";
 
 export default function App() {
   const [promises, setPromises] = useState([]);
@@ -12,6 +13,7 @@ export default function App() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [status, setStatus] = useState("all");
+  const [showAbout, setShowAbout] = useState(false);
 
   // Load data once when the app opens.
   useEffect(() => {
@@ -58,6 +60,9 @@ export default function App() {
             What was promised. What was delivered. With sources.
           </p>
         </div>
+        <button className="about-btn" onClick={() => setShowAbout(true)}>
+          About &amp; Methodology
+        </button>
       </header>
 
       {!isLiveDatabase && (
@@ -99,6 +104,8 @@ export default function App() {
         Every entry requires a public source. Statuses reflect documented
         outcomes, not opinions. Built to inform, not to campaign.
       </footer>
+
+      <AboutModal open={showAbout} onClose={() => setShowAbout(false)} />
     </div>
   );
 }
