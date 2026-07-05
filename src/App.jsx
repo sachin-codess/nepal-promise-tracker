@@ -1,14 +1,16 @@
 import { useState, useEffect, useMemo } from "react";
-import { fetchPromises, isLiveDatabase } from "./lib/supabase";
+import { fetchPromises, fetchEvents, isLiveDatabase } from "./lib/supabase";
 import StatsBar from "./components/StatsBar";
 import Controls from "./components/Controls";
 import PromiseCard from "./components/PromiseCard";
 import AboutModal from "./components/AboutModal";
 import PartyModal from "./components/PartyModal";
 import PoliticianModal from "./components/PoliticianModal";
+import TimelineModal from "./components/TimelineModal";
 
 export default function App() {
   const [promises, setPromises] = useState([]);
+  const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
 
@@ -18,6 +20,7 @@ export default function App() {
   const [showAbout, setShowAbout] = useState(false);
   const [activeParty, setActiveParty] = useState(null);
   const [activePolitician, setActivePolitician] = useState(null);
+  const [timelinePromise, setTimelinePromise] = useState(null);
 
   // Load data once when the app opens.
   useEffect(() => {
@@ -28,9 +31,25 @@ export default function App() {
       if (error) setLoadError(error.message);
       setPromises(data);
       setLoading(false);
+      // Events load separately; the app works fine even if this is empty.
+      const ev = await fetchEvents();
+      if (!cancelled && ev.data) setEvents(ev.data);
     })();
     return () => { cancelled = true; };
   }, []);
+
+  // Count events per promise, so cards know whether to show the button.
+  const eventCounts = useMemo(() => {
+    const m = {};
+    for (const e of events) m[e.promise_id] = (m[e.promise_id] || 0) + 1;
+    return m;
+  }, [events]);
+
+  // Events for the promise whose timeline is open.
+  const timelineEvents = useMemo(() => {
+    if (!timelinePromise) return [];
+    return events.filter((e) => e.promise_id === timelinePromise.id);
+  }, [events, timelinePromise]);
 
   // Apply search + filters. Recomputed only when inputs change.
   const visible = useMemo(() => {
@@ -127,7 +146,16 @@ export default function App() {
         </p>
       ) : (
         <main className="grid">
-          {visible.map((p) => <PromiseCard key={p.id} p={p} onPartyClick={setActiveParty} onPoliticianClick={setActivePolitician} />)}
+          {visible.map((p) => (
+            <PromiseCard
+              key={p.id}
+              p={p}
+              onPartyClick={setActiveParty}
+              onPoliticianClick={setActivePolitician}
+              eventCount={eventCounts[p.id] || 0}
+              onTimelineClick={setTimelinePromise}
+            />
+          ))}
         </main>
       )}
 
@@ -139,6 +167,7 @@ export default function App() {
       <AboutModal open={showAbout} onClose={() => setShowAbout(false)} />
       <PartyModal party={activeParty} promises={promises} onClose={() => setActiveParty(null)} />
       <PoliticianModal politician={activePolitician} promises={promises} onClose={() => setActivePolitician(null)} />
+      <TimelineModal promise={timelinePromise} events={timelineEvents} onClose={() => setTimelinePromise(null)} />
     </div>
   );
 }

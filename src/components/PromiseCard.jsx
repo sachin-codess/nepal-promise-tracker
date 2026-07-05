@@ -7,7 +7,7 @@ function fmtDate(d) {
   });
 }
 
-export default function PromiseCard({ p, onPartyClick, onPoliticianClick }) {
+export default function PromiseCard({ p, onPartyClick, onPoliticianClick, eventCount = 0, onTimelineClick }) {
   return (
     <article className="card">
       <div className="card-top">
@@ -44,6 +44,14 @@ export default function PromiseCard({ p, onPartyClick, onPoliticianClick }) {
         <a className="card-source" href={p.source_url} target="_blank" rel="noreferrer">
           View source →
         </a>
+      )}
+
+      {eventCount > 0 && (
+        <div>
+          <button className="card-timeline-btn" onClick={() => onTimelineClick && onTimelineClick(p)}>
+            View timeline ({eventCount}) →
+          </button>
+        </div>
       )}
     </article>
   );

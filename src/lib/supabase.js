@@ -28,3 +28,19 @@ export async function fetchPromises() {
     .order("date_made", { ascending: false });
   return { data: data ?? [], error, live: true };
 }
+
+// Fetch evidence events. Pass a promiseId for one promise's chain,
+// or call with no argument to load all events at once.
+export async function fetchEvents(promiseId) {
+  if (!supabase) {
+    await new Promise((r) => setTimeout(r, 150));
+    return { data: [], error: null };
+  }
+  let query = supabase
+    .from("evidence_events")
+    .select("*")
+    .order("event_date", { ascending: true });
+  if (promiseId != null) query = query.eq("promise_id", promiseId);
+  const { data, error } = await query;
+  return { data: data ?? [], error };
+}

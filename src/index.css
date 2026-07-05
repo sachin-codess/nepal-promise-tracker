@@ -346,3 +346,53 @@ body {
   border-color: #DC143C;
   box-shadow: 0 0 0 1px #DC143C inset;
 }
+
+/* Evidence timeline */
+.tl-title { margin: 0 0 0.25rem; font-size: 1.25rem; }
+.tl-promise { font-style: italic; color: #333; margin: 0 0 0.15rem; }
+.tl-sub { color: #666; font-size: 0.85rem; margin: 0 0 1.25rem; }
+.tl-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 0.5rem;
+  border-left: 2px solid #e2e2e2;
+}
+.tl-item { position: relative; padding: 0 0 1.4rem 1.25rem; }
+.tl-item:last-child { padding-bottom: 0; }
+.tl-dot {
+  position: absolute;
+  left: -7px;
+  top: 3px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px #ddd;
+}
+.tl-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.15rem; }
+.tl-date { font-size: 0.8rem; color: #888; }
+.tl-tag {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border: 1px solid;
+  border-radius: 999px;
+  padding: 0.05rem 0.45rem;
+}
+.tl-event-title { font-weight: 600; font-size: 0.95rem; }
+.tl-desc { margin: 0.2rem 0 0.3rem; font-size: 0.88rem; color: #444; line-height: 1.45; }
+.tl-source { font-size: 0.82rem; color: #1E3A5F; text-decoration: none; }
+.tl-source:hover { text-decoration: underline; }
+
+/* Timeline button on cards */
+.card-timeline-btn {
+  margin-top: 0.5rem;
+  background: none;
+  border: none;
+  color: #1E3A5F;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0;
+}
+.card-timeline-btn:hover { text-decoration: underline; }
