@@ -100,15 +100,17 @@ export default function App() {
             What was promised. What was delivered. With sources.
           </p>
         </div>
-        <button className="map-btn" onClick={() => setShowMap(true)}>
-          Map
-        </button>
-        <button className="analytics-btn" onClick={() => setShowAnalytics(true)}>
-          Analytics
-        </button>
-        <button className="about-btn" onClick={() => setShowAbout(true)}>
-          About &amp; Methodology
-        </button>
+        <div className="header-actions">
+          <button className="map-btn" onClick={() => setShowMap(true)}>
+            Map
+          </button>
+          <button className="analytics-btn" onClick={() => setShowAnalytics(true)}>
+            Analytics
+          </button>
+          <button className="about-btn" onClick={() => setShowAbout(true)}>
+            About &amp; Methodology
+          </button>
+        </div>
       </header>
 
       {!isLiveDatabase && (

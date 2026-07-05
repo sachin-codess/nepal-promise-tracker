@@ -500,3 +500,15 @@ body {
   font-size: 0.85rem;
 }
 .province-clear:hover { text-decoration: underline; }
+
+/* Header: stack title row and button row vertically */
+.header {
+  flex-wrap: wrap;
+}
+.header-actions {
+  flex-basis: 100%;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
