@@ -23,7 +23,7 @@ export async function fetchPromises() {
     return { data: DEMO_PROMISES, error: null, live: false };
   }
   const { data, error } = await supabase
-    .from("promises")
+    .from("promises_full")
     .select("*")
     .order("date_made", { ascending: false });
   return { data: data ?? [], error, live: true };
