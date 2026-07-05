@@ -95,7 +95,7 @@ export default function App() {
         </div>
       )}
 
-      <StatsBar promises={promises} />
+      <StatsBar promises={promises} status={status} setStatus={setStatus} />
 
       {parties.length > 0 && (
         <div className="party-menu">

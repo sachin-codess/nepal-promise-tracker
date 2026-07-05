@@ -331,3 +331,18 @@ body {
   text-align: left;
 }
 .pol-link:hover { text-decoration: underline; text-underline-offset: 2px; }
+
+/* Clickable stat cards (status filter) */
+.stats .stat {
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: inherit;
+  font: inherit;
+  text-align: center;
+  transition: border-color 0.15s, transform 0.1s;
+}
+.stats .stat:hover { transform: translateY(-2px); }
+.stats .stat.stat-active {
+  border-color: #DC143C;
+  box-shadow: 0 0 0 1px #DC143C inset;
+}
