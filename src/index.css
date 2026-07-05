@@ -436,3 +436,67 @@ body {
 /* Header layout: title block expands, buttons grouped on the right */
 .header > div:nth-of-type(3) { flex: 1 1 auto; min-width: 0; }
 .header .analytics-btn, .header .about-btn { flex-shrink: 0; align-self: flex-start; }
+
+/* Province map */
+.modal-wide { max-width: 720px; }
+.map-wrap {
+  margin-top: 1rem;
+  background: #F8F4EC;
+  border: 1px solid #e6ddcd;
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+.map-svg { width: 100%; height: auto; display: block; }
+.map-label {
+  font-size: 13px;
+  font-weight: 600;
+  fill: #2a2a2a;
+}
+.map-count {
+  font-size: 15px;
+  font-weight: 700;
+  fill: #1E3A5F;
+}
+.map-hint {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  color: #444;
+  text-align: center;
+}
+
+/* Map button in header */
+.map-btn {
+  background: none;
+  border: 1px solid #1E3A5F;
+  color: #1E3A5F;
+  border-radius: 6px;
+  padding: 0.4rem 0.75rem;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.map-btn:hover { background: #1E3A5F; color: #fff; }
+
+/* Province filter banner */
+.province-banner {
+  background: #EEF3F8;
+  border: 1px solid #cddcea;
+  border-radius: 6px;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: #1E3A5F;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.province-clear {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #B3261E;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.85rem;
+}
+.province-clear:hover { text-decoration: underline; }

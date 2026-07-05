@@ -8,6 +8,7 @@ import PartyModal from "./components/PartyModal";
 import PoliticianModal from "./components/PoliticianModal";
 import TimelineModal from "./components/TimelineModal";
 import AnalyticsModal from "./components/AnalyticsModal";
+import MapModal from "./components/MapModal";
 
 export default function App() {
   const [promises, setPromises] = useState([]);
@@ -20,6 +21,8 @@ export default function App() {
   const [status, setStatus] = useState("all");
   const [showAbout, setShowAbout] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [showMap, setShowMap] = useState(false);
+  const [province, setProvince] = useState("all");
   const [activeParty, setActiveParty] = useState(null);
   const [activePolitician, setActivePolitician] = useState(null);
   const [timelinePromise, setTimelinePromise] = useState(null);
@@ -59,13 +62,14 @@ export default function App() {
     return promises.filter((p) => {
       if (category !== "All" && p.category !== category) return false;
       if (status !== "all" && p.status !== status) return false;
+      if (province !== "all" && p.province !== province) return false;
       if (q) {
         const hay = `${p.politician} ${p.promise} ${p.party ?? ""}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
     });
-  }, [promises, search, category, status]);
+  }, [promises, search, category, status, province]);
 
   // Unique parties present in the data, for the menu.
   const parties = useMemo(() => {
@@ -96,6 +100,9 @@ export default function App() {
             What was promised. What was delivered. With sources.
           </p>
         </div>
+        <button className="map-btn" onClick={() => setShowMap(true)}>
+          Map
+        </button>
         <button className="analytics-btn" onClick={() => setShowAnalytics(true)}>
           Analytics
         </button>
@@ -143,6 +150,13 @@ export default function App() {
         status={status} setStatus={setStatus}
       />
 
+      {province !== "all" && (
+        <div className="province-banner">
+          Showing promises for <strong>{province}</strong> province
+          <button className="province-clear" onClick={() => setProvince("all")}>clear ×</button>
+        </div>
+      )}
+
       {loading ? (
         <p className="empty">Loading promises…</p>
       ) : visible.length === 0 ? (
@@ -174,6 +188,7 @@ export default function App() {
       <PoliticianModal politician={activePolitician} promises={promises} onClose={() => setActivePolitician(null)} />
       <TimelineModal promise={timelinePromise} events={timelineEvents} onClose={() => setTimelinePromise(null)} />
       <AnalyticsModal open={showAnalytics} promises={promises} onClose={() => setShowAnalytics(false)} />
+      <MapModal open={showMap} promises={promises} onProvinceClick={(name) => { setProvince(name); setShowMap(false); }} onClose={() => setShowMap(false)} />
     </div>
   );
 }
