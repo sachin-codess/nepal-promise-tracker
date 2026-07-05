@@ -7,12 +7,16 @@ function fmtDate(d) {
   });
 }
 
-export default function PromiseCard({ p, onPartyClick }) {
+export default function PromiseCard({ p, onPartyClick, onPoliticianClick }) {
   return (
     <article className="card">
       <div className="card-top">
         <div>
-          <div className="card-politician">{p.politician}</div>
+          <div className="card-politician">
+            <button className="pol-link" onClick={() => onPoliticianClick && onPoliticianClick(p.politician)}>
+              {p.politician}
+            </button>
+          </div>
           <div className="card-meta">
             {p.position}
             {p.party ? <span className="dot-sep">·</span> : null}

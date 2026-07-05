@@ -5,6 +5,7 @@ import Controls from "./components/Controls";
 import PromiseCard from "./components/PromiseCard";
 import AboutModal from "./components/AboutModal";
 import PartyModal from "./components/PartyModal";
+import PoliticianModal from "./components/PoliticianModal";
 
 export default function App() {
   const [promises, setPromises] = useState([]);
@@ -16,6 +17,7 @@ export default function App() {
   const [status, setStatus] = useState("all");
   const [showAbout, setShowAbout] = useState(false);
   const [activeParty, setActiveParty] = useState(null);
+  const [activePolitician, setActivePolitician] = useState(null);
 
   // Load data once when the app opens.
   useEffect(() => {
@@ -125,7 +127,7 @@ export default function App() {
         </p>
       ) : (
         <main className="grid">
-          {visible.map((p) => <PromiseCard key={p.id} p={p} onPartyClick={setActiveParty} />)}
+          {visible.map((p) => <PromiseCard key={p.id} p={p} onPartyClick={setActiveParty} onPoliticianClick={setActivePolitician} />)}
         </main>
       )}
 
@@ -136,6 +138,7 @@ export default function App() {
 
       <AboutModal open={showAbout} onClose={() => setShowAbout(false)} />
       <PartyModal party={activeParty} promises={promises} onClose={() => setActiveParty(null)} />
+      <PoliticianModal politician={activePolitician} promises={promises} onClose={() => setActivePolitician(null)} />
     </div>
   );
 }

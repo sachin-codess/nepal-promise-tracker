@@ -313,3 +313,21 @@ body {
 @media (max-width: 560px) {
   .party-stats { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ---------- politician modal extras ---------- */
+.pol-subhead {
+  font-size: 14px; color: var(--muted);
+  margin-top: -2px; margin-bottom: 12px;
+}
+.pol-bio {
+  font-size: 14.5px; color: var(--ink); line-height: 1.6;
+  background: #f4f1ec; border-radius: 8px;
+  padding: 14px 16px; margin-bottom: 4px;
+}
+/* clickable politician name on cards */
+.pol-link {
+  background: none; border: none; padding: 0;
+  font: inherit; color: inherit; cursor: pointer;
+  text-align: left;
+}
+.pol-link:hover { text-decoration: underline; text-underline-offset: 2px; }
