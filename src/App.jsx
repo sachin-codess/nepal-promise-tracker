@@ -44,9 +44,12 @@ export default function App() {
     <div className="app">
       <header className="header">
         <div className="header-flag" aria-hidden="true">
-          <svg width="26" height="38" viewBox="0 0 26 38">
-            <path d="M2 0 L24 9 L2 18 Z" fill="#DC143C" stroke="#1E3A5F" strokeWidth="2" />
-            <path d="M2 17 L24 27 L2 37 Z" fill="#DC143C" stroke="#1E3A5F" strokeWidth="2" />
+          <img src="/nepal-flag.svg" alt="Flag of Nepal" width="30" height="37" style={{ display: "block" }} />
+        </div>
+        <div className="header-logo" aria-hidden="true">
+          <svg width="40" height="30" viewBox="0 0 110 90">
+            <path d="M14 46 C14 22 44 22 52 46" fill="none" stroke="#003893" strokeWidth="14" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M52 46 L64 78 L102 14" fill="none" stroke="#DC143C" strokeWidth="14" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
         <div>
