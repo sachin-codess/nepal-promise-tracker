@@ -432,3 +432,7 @@ body {
   cursor: pointer;
 }
 .analytics-btn:hover { background: #1E3A5F; color: #fff; }
+
+/* Header layout: title block expands, buttons grouped on the right */
+.header > div:nth-of-type(3) { flex: 1 1 auto; min-width: 0; }
+.header .analytics-btn, .header .about-btn { flex-shrink: 0; align-self: flex-start; }
