@@ -1,13 +1,15 @@
 // The signature element: a pennant-shaped status badge, echoing Nepal's
 // double-pennant flag (the only non-rectangular national flag on Earth).
+import { useT } from "../lib/i18n";
 
 const STATUS = {
-  kept: { label: "Kept", color: "#2E7D4F" },
-  broken: { label: "Broken", color: "#C0392B" },
-  in_progress: { label: "In progress", color: "#C9862B" },
+  kept: { key: "kept", color: "#2E7D4F" },
+  broken: { key: "broken", color: "#C0392B" },
+  in_progress: { key: "inProgress", color: "#C9862B" },
 };
 
 export default function StatusPennant({ status }) {
+  const t = useT();
   const s = STATUS[status] ?? STATUS.in_progress;
   return (
     <span className="pennant" style={{ "--pennant-color": s.color }}>
@@ -16,7 +18,7 @@ export default function StatusPennant({ status }) {
         <path d="M1 0 L13 5 L1 10 Z" fill={s.color} />
         <path d="M1 9 L13 14.5 L1 20 Z" fill={s.color} opacity="0.75" />
       </svg>
-      {s.label}
+      {t(s.key)}
     </span>
   );
 }

@@ -1,4 +1,5 @@
 import StatusPennant from "./StatusPennant";
+import { useT } from "../lib/i18n";
 
 function fmtDate(d) {
   if (!d) return null;
@@ -8,6 +9,7 @@ function fmtDate(d) {
 }
 
 export default function PromiseCard({ p, onPartyClick, onPoliticianClick, eventCount = 0, onTimelineClick }) {
+  const t = useT();
   return (
     <article className="card">
       <div className="card-top">
@@ -34,22 +36,22 @@ export default function PromiseCard({ p, onPartyClick, onPoliticianClick, eventC
 
       <div className="card-dates">
         <span className="chip">{p.category}</span>
-        {p.date_made && <span>Promised {fmtDate(p.date_made)}</span>}
-        {p.deadline && <span>Deadline {fmtDate(p.deadline)}</span>}
+        {p.date_made && <span>{t("promised")} {fmtDate(p.date_made)}</span>}
+        {p.deadline && <span>{t("deadline")} {fmtDate(p.deadline)}</span>}
       </div>
 
       {p.evidence && <p className="card-evidence">{p.evidence}</p>}
 
       {p.source_url && (
         <a className="card-source" href={p.source_url} target="_blank" rel="noreferrer">
-          View source →
+          {t("viewSource")}
         </a>
       )}
 
       {eventCount > 0 && (
         <div>
           <button className="card-timeline-btn" onClick={() => onTimelineClick && onTimelineClick(p)}>
-            View timeline ({eventCount}) →
+            {t("viewTimeline")} ({eventCount}) →
           </button>
         </div>
       )}

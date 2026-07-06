@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useLang, useT } from "./lib/i18n";
 import { fetchPromises, fetchEvents, isLiveDatabase } from "./lib/supabase";
 import StatsBar from "./components/StatsBar";
 import Controls from "./components/Controls";
@@ -22,6 +23,8 @@ export default function App() {
   const [showAbout, setShowAbout] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [showMap, setShowMap] = useState(false);
+  const { lang, setLang } = useLang();
+  const t = useT();
   const [province, setProvince] = useState("all");
   const [activeParty, setActiveParty] = useState(null);
   const [activePolitician, setActivePolitician] = useState(null);
@@ -97,18 +100,21 @@ export default function App() {
         <div>
           <h1>Nepal Promise Tracker <span className="devanagari">वाचा</span></h1>
           <p className="tagline">
-            What was promised. What was delivered. With sources.
+            {t("tagline")}
           </p>
         </div>
         <div className="header-actions">
+          <button className="lang-btn" onClick={() => setLang(lang === "en" ? "ne" : "en")}>
+            {lang === "en" ? "ने" : "EN"}
+          </button>
           <button className="map-btn" onClick={() => setShowMap(true)}>
-            Map
+            {t("map")}
           </button>
           <button className="analytics-btn" onClick={() => setShowAnalytics(true)}>
-            Analytics
+            {t("analytics")}
           </button>
           <button className="about-btn" onClick={() => setShowAbout(true)}>
-            About &amp; Methodology
+            {t("about")}
           </button>
         </div>
       </header>
@@ -132,7 +138,7 @@ export default function App() {
 
       {parties.length > 0 && (
         <div className="party-menu">
-          <span className="party-menu-label">Parties:</span>
+          <span className="party-menu-label">{t("parties")}</span>
           {parties.map((pt) => (
             <button
               key={pt.name}
@@ -154,17 +160,15 @@ export default function App() {
 
       {province !== "all" && (
         <div className="province-banner">
-          Showing promises for <strong>{province}</strong> province
-          <button className="province-clear" onClick={() => setProvince("all")}>clear ×</button>
+          {t("showingProvince")} <strong>{province}</strong> {t("province")}
+          <button className="province-clear" onClick={() => setProvince("all")}>{t("clear")}</button>
         </div>
       )}
 
       {loading ? (
-        <p className="empty">Loading promises…</p>
+        <p className="empty">{t("loading")}</p>
       ) : visible.length === 0 ? (
-        <p className="empty">
-          No promises match. Clear the search or filters to see everything.
-        </p>
+        <p className="empty">{t("noMatch")}</p>
       ) : (
         <main className="grid">
           {visible.map((p) => (
@@ -181,8 +185,7 @@ export default function App() {
       )}
 
       <footer className="footer">
-        Every entry requires a public source. Statuses reflect documented
-        outcomes, not opinions. Built to inform, not to campaign.
+        {t("footer")}
       </footer>
 
       <AboutModal open={showAbout} onClose={() => setShowAbout(false)} />

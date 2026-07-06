@@ -512,3 +512,18 @@ body {
   justify-content: flex-end;
   margin-top: 4px;
 }
+
+/* Language toggle button */
+.lang-btn {
+  background: #1E3A5F;
+  border: 1px solid #1E3A5F;
+  color: #fff;
+  border-radius: 6px;
+  padding: 0.4rem 0.7rem;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 42px;
+}
+.lang-btn:hover { opacity: 0.9; }
