@@ -1,13 +1,18 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 /* PartyModal — one party's track record: stats, politicians, promises. */
 export default function PartyModal({ party, promises, onClose }) {
+  const [filter, setFilter] = useState("all");
+
   useEffect(() => {
     if (!party) return;
     const onKey = (e) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [party, onClose]);
+
+  // Reset the status filter whenever a different party opens.
+  useEffect(() => { setFilter("all"); }, [party]);
 
   const info = useMemo(() => {
     if (!party) return null;
@@ -33,6 +38,10 @@ export default function PartyModal({ party, promises, onClose }) {
   const statusLabel = { kept: "Kept", broken: "Broken", in_progress: "In progress" };
   const statusClass = { kept: "chip-kept", broken: "chip-broken", in_progress: "chip-progress" };
 
+  // Click a stat to filter; click the active one again to reset.
+  const pick = (key) => setFilter(filter === key ? "all" : key);
+  const shown = filter === "all" ? info.rows : info.rows.filter((p) => p.status === filter);
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
@@ -50,22 +59,38 @@ export default function PartyModal({ party, promises, onClose }) {
         </h2>
 
         <div className="party-stats">
-          <div className="party-stat">
+          <button
+            type="button"
+            className={"party-stat" + (filter === "all" ? " party-stat-active" : "")}
+            onClick={() => setFilter("all")}
+          >
             <span className="party-stat-num">{info.total}</span>
             <span className="party-stat-label">Promises</span>
-          </div>
-          <div className="party-stat">
+          </button>
+          <button
+            type="button"
+            className={"party-stat" + (filter === "kept" ? " party-stat-active" : "")}
+            onClick={() => pick("kept")}
+          >
             <span className="party-stat-num" style={{ color: "#1a7a3c" }}>{info.counts.kept}</span>
             <span className="party-stat-label">Kept</span>
-          </div>
-          <div className="party-stat">
+          </button>
+          <button
+            type="button"
+            className={"party-stat" + (filter === "broken" ? " party-stat-active" : "")}
+            onClick={() => pick("broken")}
+          >
             <span className="party-stat-num" style={{ color: "#c0281f" }}>{info.counts.broken}</span>
             <span className="party-stat-label">Broken</span>
-          </div>
-          <div className="party-stat">
+          </button>
+          <button
+            type="button"
+            className={"party-stat" + (filter === "in_progress" ? " party-stat-active" : "")}
+            onClick={() => pick("in_progress")}
+          >
             <span className="party-stat-num" style={{ color: "#a5730a" }}>{info.counts.in_progress}</span>
             <span className="party-stat-label">In progress</span>
-          </div>
+          </button>
         </div>
 
         <section className="modal-section">
@@ -81,9 +106,9 @@ export default function PartyModal({ party, promises, onClose }) {
         </section>
 
         <section className="modal-section">
-          <h3>Promises ({info.total})</h3>
+          <h3>Promises ({shown.length}{filter !== "all" ? ` of ${info.total}` : ""})</h3>
           <ul className="party-promise-list">
-            {info.rows.map((p) => (
+            {shown.map((p) => (
               <li key={p.id} className="party-promise">
                 <div className="party-promise-top">
                   <span className={`chip ${statusClass[p.status]}`}>{statusLabel[p.status]}</span>

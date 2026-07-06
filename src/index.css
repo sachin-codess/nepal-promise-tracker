@@ -527,3 +527,15 @@ body {
   min-width: 42px;
 }
 .lang-btn:hover { opacity: 0.9; }
+
+/* Clickable status filter inside party/politician modals */
+.party-stat {
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: inherit;
+  font: inherit;
+  border-radius: 6px;
+  transition: border-color 0.15s;
+}
+.party-stat:hover { border-color: #ccc; }
+.party-stat-active { border-color: #1E3A5F; box-shadow: 0 0 0 1px #1E3A5F inset; }
