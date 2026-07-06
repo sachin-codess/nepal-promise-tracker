@@ -576,3 +576,60 @@ body {
   text-decoration: none;
 }
 .budget-source:hover { text-decoration: underline; }
+
+/* National budget modal */
+.nbudget-list { list-style: none; margin: 1rem 0 0; padding: 0; }
+.nbudget-item { margin-bottom: 0.85rem; }
+.nbudget-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  margin-bottom: 0.25rem;
+}
+.nbudget-sector { color: #333; font-weight: 600; }
+.nbudget-amt { color: #1E3A5F; white-space: nowrap; }
+.nbudget-share { color: #999; font-weight: 400; font-size: 0.82rem; }
+.nbudget-track {
+  height: 10px;
+  background: #eee;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.nbudget-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #1E3A5F, #2E7D4F);
+  border-radius: 5px;
+}
+.nbudget-src {
+  font-size: 0.75rem;
+  color: #888;
+  text-decoration: none;
+}
+.nbudget-src:hover { text-decoration: underline; }
+.nbudget-note {
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  color: #888;
+  line-height: 1.5;
+  border-top: 1px solid #eee;
+  padding-top: 0.75rem;
+}
+
+/* Budget execution panel */
+.exec-panel {
+  background: #FBF3E2;
+  border: 1px solid #E8D5A8;
+  border-radius: 8px;
+  padding: 0.9rem 1rem;
+  margin: 1rem 0 1.25rem;
+}
+.exec-title { margin: 0 0 0.4rem; font-size: 1rem; color: #6b5518; }
+.exec-intro { margin: 0 0 0.6rem; font-size: 0.88rem; color: #5a4a1e; line-height: 1.5; }
+.exec-facts { margin: 0 0 0.5rem; padding-left: 1.1rem; }
+.exec-facts li { font-size: 0.86rem; color: #333; margin-bottom: 0.3rem; line-height: 1.45; }
+.exec-subhead { margin: 0 0 0.5rem; font-size: 0.95rem; color: #1E3A5F; }
+
+/* USD approximation note in budget modal */
+.usd-approx { color: #888; font-weight: 400; font-size: 0.85rem; }

@@ -44,3 +44,18 @@ export async function fetchEvents(promiseId) {
   const { data, error } = await query;
   return { data: data ?? [], error };
 }
+
+// Fetch national budget rows, optionally for one fiscal year, largest first.
+export async function fetchBudget(fiscalYear) {
+  if (!supabase) {
+    await new Promise((r) => setTimeout(r, 150));
+    return { data: [], error: null };
+  }
+  let query = supabase
+    .from("national_budget")
+    .select("*")
+    .order("amount", { ascending: false });
+  if (fiscalYear) query = query.eq("fiscal_year", fiscalYear);
+  const { data, error } = await query;
+  return { data: data ?? [], error };
+}

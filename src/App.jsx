@@ -10,6 +10,7 @@ import PoliticianModal from "./components/PoliticianModal";
 import TimelineModal from "./components/TimelineModal";
 import AnalyticsModal from "./components/AnalyticsModal";
 import MapModal from "./components/MapModal";
+import BudgetModal from "./components/BudgetModal";
 
 export default function App() {
   const [promises, setPromises] = useState([]);
@@ -23,6 +24,7 @@ export default function App() {
   const [showAbout, setShowAbout] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [showMap, setShowMap] = useState(false);
+  const [showBudget, setShowBudget] = useState(false);
   const { lang, setLang } = useLang();
   const t = useT();
   const [province, setProvince] = useState("all");
@@ -110,6 +112,9 @@ export default function App() {
           <button className="map-btn" onClick={() => setShowMap(true)}>
             {t("map")}
           </button>
+          <button className="map-btn" onClick={() => setShowBudget(true)}>
+            {t("budgetBtn")}
+          </button>
           <button className="analytics-btn" onClick={() => setShowAnalytics(true)}>
             {t("analytics")}
           </button>
@@ -194,6 +199,7 @@ export default function App() {
       <TimelineModal promise={timelinePromise} events={timelineEvents} onClose={() => setTimelinePromise(null)} />
       <AnalyticsModal open={showAnalytics} promises={promises} onClose={() => setShowAnalytics(false)} />
       <MapModal open={showMap} promises={promises} onProvinceClick={(name) => { setProvince(name); setShowMap(false); }} onClose={() => setShowMap(false)} />
+      <BudgetModal open={showBudget} onClose={() => setShowBudget(false)} />
     </div>
   );
 }
