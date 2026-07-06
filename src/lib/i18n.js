@@ -28,6 +28,8 @@ export const STRINGS = {
     showingProvince: "Showing promises for",
     province: "province",
     autoTranslated: "Auto-translated — may contain errors.",
+    budget: "Budget (spent / allocated):",
+    budgetSource: "Budget source →",
   },
   ne: {
     tagline: "के वाचा गरियो। के पूरा भयो। स्रोतसहित।",
@@ -55,6 +57,8 @@ export const STRINGS = {
     showingProvince: "यस प्रदेशका वाचाहरू:",
     province: "प्रदेश",
     autoTranslated: "स्वतः अनुवादित — त्रुटि हुन सक्छ।",
+    budget: "बजेट (खर्च / विनियोजित):",
+    budgetSource: "बजेट स्रोत →",
   },
 };
 

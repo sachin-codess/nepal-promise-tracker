@@ -1,4 +1,5 @@
 import StatusPennant from "./StatusPennant";
+import BudgetBar from "./BudgetBar";
 import { useT } from "../lib/i18n";
 
 function fmtDate(d) {
@@ -41,6 +42,8 @@ export default function PromiseCard({ p, onPartyClick, onPoliticianClick, eventC
       </div>
 
       {p.evidence && <p className="card-evidence">{p.evidence}</p>}
+
+      <BudgetBar p={p} />
 
       {p.source_url && (
         <a className="card-source" href={p.source_url} target="_blank" rel="noreferrer">

@@ -539,3 +539,40 @@ body {
 }
 .party-stat:hover { border-color: #ccc; }
 .party-stat-active { border-color: #1E3A5F; box-shadow: 0 0 0 1px #1E3A5F inset; }
+
+/* Budget bar */
+.budget {
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid #eee;
+}
+.budget-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.35rem;
+}
+.budget-label { color: #666; }
+.budget-figures { color: #1E3A5F; text-align: right; }
+.budget-pct { color: #888; font-weight: 400; }
+.budget-track {
+  height: 7px;
+  background: #eaeaea;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.budget-fill {
+  height: 100%;
+  background: #2E7D4F;
+  border-radius: 4px;
+}
+.budget-source {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  color: #1E3A5F;
+  text-decoration: none;
+}
+.budget-source:hover { text-decoration: underline; }
