@@ -110,7 +110,7 @@ export default function PoliticianModal({ politician, promises, onClose }) {
                 </div>
                 <p className="party-promise-text">"{p.promise}"</p>
                 <div className="party-promise-meta">
-                  <span>{p.category}</span>
+                  <span>{p.date_made ? new Date(p.date_made + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : ""}</span>
                   {p.source_url && (
                     <a href={p.source_url} target="_blank" rel="noopener noreferrer">
                       View source →
