@@ -633,3 +633,23 @@ body {
 
 /* USD approximation note in budget modal */
 .usd-approx { color: #888; font-weight: 400; font-size: 0.85rem; }
+
+/* Budget year selector */
+.budget-year-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 0.75rem 0 0.25rem;
+}
+.budget-year-label { font-size: 0.9rem; color: #555; }
+.budget-year-select {
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+}
+.budget-total-inline { font-size: 0.9rem; color: #1E3A5F; margin-left: 0.25rem; }

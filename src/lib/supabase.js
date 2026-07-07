@@ -59,3 +59,20 @@ export async function fetchBudget(fiscalYear) {
   const { data, error } = await query;
   return { data: data ?? [], error };
 }
+
+// Fetch the distinct fiscal years (AD + BS) available, newest first.
+export async function fetchBudgetYears() {
+  if (!supabase) return { data: [], error: null };
+  const { data, error } = await supabase
+    .from("national_budget")
+    .select("fiscal_year, fiscal_year_bs");
+  if (error) return { data: [], error };
+  const seen = new Map();
+  for (const r of data ?? []) {
+    if (!seen.has(r.fiscal_year)) seen.set(r.fiscal_year, r.fiscal_year_bs);
+  }
+  const years = [...seen.entries()]
+    .map(([ad, bs]) => ({ ad, bs }))
+    .sort((a, b) => b.ad.localeCompare(a.ad));
+  return { data: years, error: null };
+}
