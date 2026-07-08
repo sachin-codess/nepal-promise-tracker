@@ -1,21 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
+import { PROVINCE_PATHS } from "./provincePaths";
 
-// Stylized 7-province layout (west -> east). Not geographically exact;
-// recognizable Nepal shape, upgradeable to real GeoJSON boundaries later.
-const PROVINCES = {
-  Sudurpashchim: "M20,120 L150,90 L175,200 L150,300 L40,300 L20,200 Z",
-  Karnali:       "M150,90 L340,70 L360,210 L175,200 Z",
-  Lumbini:       "M175,200 L360,210 L390,340 L200,360 L150,300 Z",
-  Gandaki:       "M360,210 L520,150 L560,250 L420,300 L390,340 Z",
-  Bagmati:       "M520,150 L660,160 L690,280 L560,290 L560,250 Z",
-  Koshi:         "M660,160 L900,120 L940,300 L740,320 L690,280 Z",
-  Madhesh:       "M420,300 L560,290 L690,280 L740,320 L720,400 L440,410 L390,340 L200,360 Z",
-};
+// Real Nepal province boundaries (source: mesaugat/geoJSON-Nepal, ADM1 2017),
+// projected + simplified to an 800x400 SVG. Keyed by province name.
+const PROVINCES = PROVINCE_PATHS;
 
-// Approx label anchor points (centre-ish of each region).
+// Label anchor points, computed from each province's real interior point.
 const LABELS = {
-  Sudurpashchim: [88, 205], Karnali: [255, 145], Lumbini: [270, 285],
-  Gandaki: [460, 240], Bagmati: [600, 225], Koshi: [800, 220], Madhesh: [540, 355],
+  Sudurpashchim: [138.2, 114.4],
+  Karnali: [265.0, 116.4],
+  Lumbini: [268.9, 227.6],
+  Gandaki: [392.3, 201.2],
+  Bagmati: [503.0, 269.0],
+  Koshi: [648.5, 308.2],
+  Madhesh: [520.5, 334.9],
 };
 
 function shade(count, max) {
@@ -62,7 +60,7 @@ export default function MapModal({ open, promises, onProvinceClick, onClose }) {
         </p>
 
         <div className="map-wrap">
-          <svg viewBox="0 0 960 440" className="map-svg" role="img" aria-label="Map of Nepal provinces">
+          <svg viewBox="0 0 800 400" className="map-svg" role="img" aria-label="Map of Nepal provinces">
             {Object.entries(PROVINCES).map(([name, d]) => (
               <path
                 key={name}
