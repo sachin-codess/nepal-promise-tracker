@@ -10,6 +10,7 @@ export default function AdminPanel() {
   const [msg, setMsg] = useState("");
   const [busyId, setBusyId] = useState(null);
   const [articleText, setArticleText] = useState("");
+  const [sourceUrl, setSourceUrl] = useState("");
   const [drafting, setDrafting] = useState(false);
 
   // Call our serverless function to extract promise drafts from pasted text,
@@ -17,6 +18,10 @@ export default function AdminPanel() {
   async function draftFromArticle() {
     if (articleText.trim().length < 40) {
       setMsg("Paste more article text first.");
+      return;
+    }
+    if (sourceUrl.trim().length < 8) {
+      setMsg("Paste the article's source URL first — every promise needs a link.");
       return;
     }
     setDrafting(true);
@@ -39,7 +44,8 @@ export default function AdminPanel() {
         setDrafting(false);
         return;
       }
-      // Insert each draft into the holding table.
+      // Insert each draft into the holding table. The source URL you typed is
+      // stamped onto every draft from this article, overriding anything the AI guessed.
       const rows = drafts.map((d) => ({
         politician_name: d.politician_name || "Unknown",
         party_name: d.party_name || null,
@@ -47,7 +53,7 @@ export default function AdminPanel() {
         category: d.category || null,
         status: d.status || "in_progress",
         province: d.province || "Federal",
-        source_url: d.source_url || null,
+        source_url: sourceUrl.trim(),
         date_made: d.date_made || null,
         ai_notes: d.ai_notes || null,
       }));
@@ -55,6 +61,7 @@ export default function AdminPanel() {
       if (error) { setMsg("Insert failed: " + error.message); setDrafting(false); return; }
       setMsg(`Drafted ${rows.length} promise(s) — review them below.`);
       setArticleText("");
+      setSourceUrl("");
       load();
     } catch (e) {
       setMsg("Network error: " + String(e));
@@ -85,6 +92,13 @@ export default function AdminPanel() {
   async function approve(row) {
     setBusyId(row.id);
     setMsg("");
+
+    // Guard: never let a promise go live without a source link.
+    if (!row.source_url) {
+      setMsg("Cannot approve — this draft has no source URL. Reject it and re-draft with a link.");
+      setBusyId(null);
+      return;
+    }
 
     // 1. Find the party id (if a party name was given).
     let party_id = null;
@@ -147,6 +161,15 @@ export default function AdminPanel() {
       <div style={{ border: "1px solid #ddd", borderRadius: 10, padding: "1rem 1.25rem",
         margin: "1rem 0", background: "#fff" }}>
         <div style={{ fontWeight: 600, marginBottom: 8 }}>Draft from an article</div>
+        <input
+          type="url"
+          value={sourceUrl}
+          onChange={(e) => setSourceUrl(e.target.value)}
+          placeholder="Source URL (e.g. https://kathmandupost.com/…)"
+          style={{ width: "100%", boxSizing: "border-box", padding: "0.6rem",
+            borderRadius: 6, border: "1px solid #ccc", fontFamily: "inherit",
+            fontSize: "0.95rem", marginBottom: 8 }}
+        />
         <textarea
           value={articleText}
           onChange={(e) => setArticleText(e.target.value)}
@@ -182,11 +205,15 @@ export default function AdminPanel() {
               {" · "}status: <em>{row.status}</em>
               {row.date_made ? ` · ${row.date_made}` : ""}
             </div>
-            {row.source_url && (
+            {row.source_url ? (
               <div style={{ marginTop: 6, fontSize: "0.9rem" }}>
                 source:{" "}
                 <a href={row.source_url} target="_blank" rel="noreferrer"
                    style={{ color: "#1E3A5F" }}>{row.source_url}</a>
+              </div>
+            ) : (
+              <div style={{ marginTop: 6, fontSize: "0.9rem", color: "#b71c1c" }}>
+                ⚠ no source URL — cannot approve
               </div>
             )}
             {row.ai_notes && (
