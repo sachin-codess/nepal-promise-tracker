@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useT, useLang, useCat } from "../lib/i18n";
+import { useT, useLang, useCat, fmtDate } from "../lib/i18n";
 
 const EV_META = {
   start:      { color: "#1E3A5F", key: "projStart" },
@@ -17,13 +17,6 @@ const STATUS_KEY = {
   abandoned: "stAbandoned",
 };
 
-function fmtDate(d, lang) {
-  if (!d) return "";
-  return new Date(d + "T00:00:00").toLocaleDateString(
-    lang === "ne" ? "ne-NP" : "en-GB",
-    { day: "numeric", month: "short", year: "numeric" }
-  );
-}
 
 // Rs 213,000,000,000 -> "Rs 213 Arba". Matches the convention used elsewhere.
 function fmtNpr(n) {

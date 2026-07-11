@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { useT, useCat } from "../lib/i18n";
+import { useT, useCat, useDate } from "../lib/i18n";
 
 /* PoliticianModal — one politician's facts: bio, party, position, promises. */
 export default function PoliticianModal({ politician, promises, onClose }) {
   const t = useT();
   const cat = useCat();
+  const fmtDate = useDate();
   const [filter, setFilter] = useState("all");
 
   useEffect(() => {
@@ -113,7 +114,7 @@ export default function PoliticianModal({ politician, promises, onClose }) {
                 </div>
                 <p className="party-promise-text">"{p.promise}"</p>
                 <div className="party-promise-meta">
-                  <span>{p.date_made ? new Date(p.date_made + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : ""}</span>
+                  <span>{fmtDate(p.date_made)}</span>
                   {p.source_url && (
                     <a href={p.source_url} target="_blank" rel="noopener noreferrer">
                       {t("viewSource")}

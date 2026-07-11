@@ -279,6 +279,22 @@ export function useProv() {
   return (p) => (lang === "ne" ? PROVINCE_NE[p] ?? p : p);
 }
 
+// Single source of truth for date rendering across the app.
+// Swap the body here (e.g. to Bikram Sambat) and every date on the site follows.
+export function fmtDate(d, lang) {
+  if (!d) return "";
+  return new Date(d + "T00:00:00").toLocaleDateString(
+    lang === "ne" ? "ne-NP" : "en-GB",
+    { day: "numeric", month: "short", year: "numeric" }
+  );
+}
+
+// Hook form: const fd = useDate(); fd(p.date_made)
+export function useDate() {
+  const { lang } = useLang();
+  return (d) => fmtDate(d, lang);
+}
+
 export const LangContext = createContext({ lang: "en", setLang: () => {} });
 export const useLang = () => useContext(LangContext);
 

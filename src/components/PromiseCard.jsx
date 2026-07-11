@@ -1,17 +1,11 @@
 import StatusPennant from "./StatusPennant";
 import BudgetBar from "./BudgetBar";
-import { useT, useCat } from "../lib/i18n";
-
-function fmtDate(d) {
-  if (!d) return null;
-  return new Date(d + "T00:00:00").toLocaleDateString("en-GB", {
-    day: "numeric", month: "short", year: "numeric",
-  });
-}
+import { useT, useCat, useDate } from "../lib/i18n";
 
 export default function PromiseCard({ p, onPartyClick, onPoliticianClick, eventCount = 0, onTimelineClick }) {
   const t = useT();
   const cat = useCat();
+  const fmtDate = useDate();
   return (
     <article className="card">
       <div className="card-top">

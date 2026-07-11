@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useT, useLang } from "../lib/i18n";
+import { useT, useLang, fmtDate } from "../lib/i18n";
 
 const TYPE_META = {
   made:     { color: "#1E3A5F", key: "tlMade" },
@@ -9,13 +9,6 @@ const TYPE_META = {
   evidence: { color: "#555555", key: "tlEvidence" },
 };
 
-function fmtDate(d, lang) {
-  if (!d) return "";
-  return new Date(d + "T00:00:00").toLocaleDateString(
-    lang === "ne" ? "ne-NP" : "en-GB",
-    { day: "numeric", month: "short", year: "numeric" }
-  );
-}
 
 export default function TimelineModal({ promise, events, onClose }) {
   const t = useT();
