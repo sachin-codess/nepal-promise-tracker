@@ -33,7 +33,8 @@ export const STRINGS = {
     budgetBtn: "Budget",
     budgetTitle: "National budget by sector",
     budgetYear: "Fiscal year",
-    budgetTop: "Top ministries total:",
+    budgetTop: "Top ministries:",
+    budgetOfNational: "of the national budget of",
     budgetNote: "Shows the largest ministry allocations. The full federal budget (~Rs 1.96 trillion) also includes debt servicing, transfers to provincial and local governments, and smaller offices.",
     budgetNoteA: "Shows the largest ministry allocations. The full federal budget for this year (",
     budgetNoteB: ") also includes debt servicing, transfers to provincial and local governments, and smaller offices.",
@@ -70,8 +71,11 @@ export const STRINGS = {
     tlMade: "Promised",
     tlProgress: "Progress",
     tlEvidence: "Evidence",
+    promisesLabel: "Promises",
+    politiciansH: "Politicians",
+    promisesH: "Promises",
+    ofTotal: "of",
     projectsBtn: "Projects",
-    apiLink: "Open data API",
     apiLink: "Open data API",
     projectsTitle: "Mega-projects",
     projectsLead: "National infrastructure that outlives the politicians who promised it. Every missed deadline, on the record.",
@@ -129,7 +133,8 @@ export const STRINGS = {
     budgetBtn: "बजेट",
     budgetTitle: "क्षेत्रअनुसार राष्ट्रिय बजेट",
     budgetYear: "आर्थिक वर्ष",
-    budgetTop: "प्रमुख मन्त्रालयहरूको जम्मा:",
+    budgetTop: "प्रमुख मन्त्रालयहरू:",
+    budgetOfNational: "कुल राष्ट्रिय बजेट",
     budgetNote: "यसले सबैभन्दा ठूला मन्त्रालय विनियोजन देखाउँछ। सम्पूर्ण संघीय बजेट (~रु १९.६ खर्ब) मा ऋण भुक्तानी, प्रदेश तथा स्थानीय सरकारमा हस्तान्तरण, र साना कार्यालयहरू पनि समावेश छन्।",
     budgetNoteA: "यसले सबैभन्दा ठूला मन्त्रालय विनियोजन देखाउँछ। यस वर्षको सम्पूर्ण संघीय बजेट (",
     budgetNoteB: ") मा ऋण भुक्तानी, प्रदेश तथा स्थानीय सरकारमा हस्तान्तरण, र साना कार्यालयहरू पनि समावेश छन्।",
@@ -166,6 +171,11 @@ export const STRINGS = {
     tlMade: "वाचा गरिएको",
     tlProgress: "प्रगति",
     tlEvidence: "\u092a\u094d\u0930\u092e\u093e\u0923",
+    promisesLabel: "वाचाहरू",
+    politiciansH: "नेताहरू",
+    promisesH: "वाचाहरू",
+    ofTotal: "मध्ये",
+    apiLink: "खुला डाटा API",
     projectsBtn: "\u0906\u092f\u094b\u091c\u0928\u093e",
     projectsTitle: "\u0930\u093e\u0937\u094d\u091f\u094d\u0930\u093f\u092f \u0917\u094c\u0930\u0935\u0915\u093e \u0906\u092f\u094b\u091c\u0928\u093e",
     projectsLead: "\u0935\u093e\u091a\u093e \u0917\u0930\u094d\u0928\u0947 \u0928\u0947\u0924\u093e\u0939\u0930\u0942\u092d\u0928\u094d\u0926\u093e \u0932\u093e\u092e\u094b \u091a\u0932\u094d\u0928\u0947 \u0930\u093e\u0937\u094d\u091f\u094d\u0930\u093f\u092f \u092a\u0942\u0930\u094d\u0935\u093e\u0927\u093e\u0930\u0964 \u0928\u093e\u0918\u093f\u090f\u0915\u093e \u0939\u0930\u0947\u0915 \u092e\u093f\u0924\u093f, \u0905\u092d\u093f\u0932\u0947\u0916\u0938\u0939\u093f\u0924\u0964",
@@ -219,9 +229,27 @@ export const CATEGORY_NE = {
 
 // cat("Health") -> "स्वास्थ्य" in Nepali, "Health" in English.
 // Unmapped categories fall back to the raw DB value, so new rows never break.
+const CATEGORY_NE_LC = Object.fromEntries(
+  Object.entries(CATEGORY_NE).map(([k, v]) => [k.toLowerCase(), v])
+);
+
+// Title-case an all-caps or lowercase DB value: "ANTI-CORRUPTION" -> "Anti-corruption"
+function tidy(c) {
+  if (!c) return c;
+  return c.charAt(0).toUpperCase() + c.slice(1).toLowerCase();
+}
+
 export function useCat() {
   const { lang } = useLang();
-  return (c) => (lang === "ne" ? CATEGORY_NE[c] ?? c : c);
+  return (c) => {
+    if (!c) return c;
+    if (lang === "ne") return CATEGORY_NE_LC[c.toLowerCase()] ?? c;
+    // English: if we know the category, show our canonical casing.
+    const known = Object.keys(CATEGORY_NE).find(
+      (k) => k.toLowerCase() === c.toLowerCase()
+    );
+    return known ?? tidy(c);
+  };
 }
 
 export const LangContext = createContext({ lang: "en", setLang: () => {} });

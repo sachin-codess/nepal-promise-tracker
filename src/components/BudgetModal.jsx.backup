@@ -17,18 +17,8 @@ function fmtNPR(amount) {
 
 // Full federal budget totals per year (for the note), so it stays year-accurate.
 const FULL_BUDGET = {
-  "2026/27": "~Rs 2.12 trillion",
   "2025/26": "~Rs 1.96 trillion",
   "2024/25": "~Rs 1.86 trillion",
-};
-
-// National budget total in NPR, per year.
-// Percentages are computed against THIS, not the sum of listed ministries
-// (which is only ~half the national budget).
-const NATIONAL_TOTAL = {
-  "2026/27": 2124340000000, // Rs 2,124.34 arba
-  "2025/26": 1964110000000, // Rs 1,964.11 arba
-  "2024/25": 1860300000000, // Rs 1,860.3 arba (verified)
 };
 
 export default function BudgetModal({ open, onClose }) {
@@ -92,12 +82,7 @@ export default function BudgetModal({ open, onClose }) {
             {years.map((y) => <option key={y.ad} value={y.ad}>{label(y)}</option>)}
           </select>
           <span className="budget-total-inline">
-            {t("budgetTop")} {fmtNPR(total)}
-            {NATIONAL_TOTAL[year] && (
-              <span className="usd-approx">
-                {" "}— {((total / NATIONAL_TOTAL[year]) * 100).toFixed(0)}% {t("budgetOfNational")} {fmtNPR(NATIONAL_TOTAL[year])}
-              </span>
-            )}
+            {t("budgetTop")} {fmtNPR(total)} <span className="usd-approx">(≈ {fmtUSD(total)})</span>
           </span>
         </div>
 
@@ -121,8 +106,7 @@ export default function BudgetModal({ open, onClose }) {
             {rows.map((r) => {
               const amt = Number(r.amount);
               const pct = Math.round((amt / max) * 100);
-              const natTotal = NATIONAL_TOTAL[year];
-              const share = natTotal ? ((amt / natTotal) * 100).toFixed(1) : null;
+              const share = total ? ((amt / total) * 100).toFixed(1) : 0;
               return (
                 <li key={r.id} className="nbudget-item">
                   <div className="nbudget-top">
