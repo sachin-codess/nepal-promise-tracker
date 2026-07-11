@@ -18,7 +18,8 @@ export default function AdminPanel() {
   const [subsLoading, setSubsLoading] = useState(true);
   const [subsMsg, setSubsMsg] = useState("");
   const [subBusyId, setSubBusyId] = useState(null);
-  const ADMIN_TOKEN = import.meta.env.VITE_ADMIN_TOKEN;
+  const [adminToken, setAdminToken] = useState("");
+  const [unlocked, setUnlocked] = useState(false);
 
   // Call our serverless function to extract promise drafts from pasted text,
   // then insert each draft into `pending_promises` for review below.
@@ -76,18 +77,15 @@ export default function AdminPanel() {
     setDrafting(false);
   }
 
-  async function loadSubs() {
-    if (!ADMIN_TOKEN) {
-      setSubsMsg("VITE_ADMIN_TOKEN not set \u2014 cannot load submissions.");
-      setSubsLoading(false);
-      return;
-    }
+  async function loadSubs(tok) {
+    const t = tok ?? adminToken;
+    if (!t) { setSubsLoading(false); return; }
     setSubsLoading(true);
     try {
-      const r = await fetch(`/api/admin/submissions?token=${encodeURIComponent(ADMIN_TOKEN)}`);
+      const r = await fetch(`/api/admin/submissions?token=${encodeURIComponent(t)}`);
       const j = await r.json();
-      if (!r.ok) { setSubsMsg(j.error || "Failed to load submissions."); setSubs([]); }
-      else { setSubs(j.data || []); setSubsMsg(""); }
+      if (!r.ok) { setSubsMsg(j.error || "Failed to load submissions."); setSubs([]); setUnlocked(false); }
+      else { setSubs(j.data || []); setSubsMsg(""); setUnlocked(true); }
     } catch (e) {
       setSubsMsg("Failed to reach the moderation route. Are you running `vercel dev`?");
     }
@@ -101,7 +99,7 @@ export default function AdminPanel() {
       const r = await fetch("/api/admin/submissions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: ADMIN_TOKEN, id: row.id, action }),
+        body: JSON.stringify({ token: adminToken, id: row.id, action }),
       });
       const j = await r.json();
       if (!r.ok) setSubsMsg(j.error || "Action failed.");
@@ -304,7 +302,34 @@ export default function AdminPanel() {
         </div>
       )}
 
-      {subsLoading ? (
+      {!unlocked ? (
+        <div style={{ border: "1px solid #ddd", borderRadius: 10, padding: "1rem 1.25rem",
+          margin: "1rem 0", background: "#fff", maxWidth: 480 }}>
+          <div style={{ fontWeight: 600, marginBottom: 8 }}>Admin token</div>
+          <div style={{ fontSize: "0.85rem", color: "#666", marginBottom: 10 }}>
+            Held in memory for this page only — never stored, never shipped in the bundle.
+          </div>
+          <input
+            type="password"
+            value={adminToken}
+            onChange={(e) => setAdminToken(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && loadSubs(adminToken)}
+            placeholder="Paste the admin token"
+            style={{ width: "100%", boxSizing: "border-box", padding: "0.6rem",
+              borderRadius: 6, border: "1px solid #ccc", fontFamily: "inherit",
+              fontSize: "0.95rem", marginBottom: 10 }}
+          />
+          <button
+            onClick={() => loadSubs(adminToken)}
+            disabled={!adminToken}
+            style={{ background: "#1E3A5F", color: "#fff", border: "none",
+              padding: "0.5rem 1.1rem", borderRadius: 6,
+              cursor: adminToken ? "pointer" : "not-allowed" }}
+          >
+            Unlock queue
+          </button>
+        </div>
+      ) : subsLoading ? (
         <p style={{ color: "#777" }}>Loading submissions…</p>
       ) : subs.length === 0 ? (
         <p style={{ color: "#777" }}>No pending submissions.</p>
