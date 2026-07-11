@@ -142,6 +142,36 @@ export const STRINGS = {
   },
 };
 
+// Category labels come from the DB (English). This maps them for display only —
+// filter comparisons still use the raw DB value, so nothing breaks.
+export const CATEGORY_NE = {
+  "Infrastructure": "पूर्वाधार",
+  "Energy": "ऊर्जा",
+  "Education": "शिक्षा",
+  "Health": "स्वास्थ्य",
+  "Economy": "अर्थतन्त्र",
+  "Environment": "वातावरण",
+  "Employment": "रोजगारी",
+  "Tourism": "पर्यटन",
+  "Governance": "सुशासन",
+  "Anti-corruption": "भ्रष्टाचारविरुद्ध",
+  "Social Welfare": "सामाजिक कल्याण",
+  "Peace & Justice": "शान्ति र न्याय",
+  "Governance & Reform": "सुशासन र सुधार",
+  "Governance & Transparency": "सुशासन र पारदर्शिता",
+  "Governance & Constitution": "सुशासन र संविधान",
+  "Foreign Policy & Economy": "परराष्ट्र नीति र अर्थतन्त्र",
+  "Development & Infrastructure": "विकास र पूर्वाधार",
+  "Sovereignty & Foreign Policy": "सार्वभौमिकता र परराष्ट्र नीति",
+};
+
+// cat("Health") -> "स्वास्थ्य" in Nepali, "Health" in English.
+// Unmapped categories fall back to the raw DB value, so new rows never break.
+export function useCat() {
+  const { lang } = useLang();
+  return (c) => (lang === "ne" ? CATEGORY_NE[c] ?? c : c);
+}
+
 export const LangContext = createContext({ lang: "en", setLang: () => {} });
 export const useLang = () => useContext(LangContext);
 

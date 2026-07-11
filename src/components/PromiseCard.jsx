@@ -1,6 +1,6 @@
 import StatusPennant from "./StatusPennant";
 import BudgetBar from "./BudgetBar";
-import { useT } from "../lib/i18n";
+import { useT, useCat } from "../lib/i18n";
 
 function fmtDate(d) {
   if (!d) return null;
@@ -11,6 +11,7 @@ function fmtDate(d) {
 
 export default function PromiseCard({ p, onPartyClick, onPoliticianClick, eventCount = 0, onTimelineClick }) {
   const t = useT();
+  const cat = useCat();
   return (
     <article className="card">
       <div className="card-top">
@@ -36,7 +37,7 @@ export default function PromiseCard({ p, onPartyClick, onPoliticianClick, eventC
       <p className="card-promise">“{p.promise}”</p>
 
       <div className="card-dates">
-        <span className="chip">{p.category}</span>
+        <span className="chip">{cat(p.category)}</span>
         {p.date_made && <span>{t("promised")} {fmtDate(p.date_made)}</span>}
         {p.deadline && <span>{t("deadline")} {fmtDate(p.deadline)}</span>}
       </div>

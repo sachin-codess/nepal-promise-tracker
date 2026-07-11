@@ -76,6 +76,13 @@ export default function App() {
     });
   }, [promises, search, category, status, province]);
 
+  // Unique categories present in the data, for the filter dropdown.
+  const categories = useMemo(() => {
+    const set = [...new Set(promises.map((p) => p.category).filter(Boolean))];
+    set.sort((a, b) => a.localeCompare(b));
+    return ["All", ...set];
+  }, [promises]);
+
   // Unique parties present in the data, for the menu.
   const parties = useMemo(() => {
     const seen = new Map();
@@ -159,7 +166,7 @@ export default function App() {
 
       <Controls
         search={search} setSearch={setSearch}
-        category={category} setCategory={setCategory}
+        category={category} setCategory={setCategory} categories={categories}
         status={status} setStatus={setStatus}
       />
 

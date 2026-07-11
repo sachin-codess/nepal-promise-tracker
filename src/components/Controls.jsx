@@ -1,8 +1,8 @@
-import { CATEGORIES } from "../data/demoData";
-import { useT } from "../lib/i18n";
+import { useT, useCat } from "../lib/i18n";
 
-export default function Controls({ search, setSearch, category, setCategory, status, setStatus }) {
+export default function Controls({ search, setSearch, category, setCategory, categories, status, setStatus }) {
   const t = useT();
+  const cat = useCat();
   return (
     <div className="controls">
       <input
@@ -14,8 +14,8 @@ export default function Controls({ search, setSearch, category, setCategory, sta
         aria-label="Search promises"
       />
       <select value={category} onChange={(e) => setCategory(e.target.value)} aria-label="Filter by category">
-        {CATEGORIES.map((c) => (
-          <option key={c} value={c}>{c === "All" ? t("allCategories") : c}</option>
+        {categories.map((c) => (
+          <option key={c} value={c}>{c === "All" ? t("allCategories") : cat(c)}</option>
         ))}
       </select>
       <select value={status} onChange={(e) => setStatus(e.target.value)} aria-label="Filter by status">
