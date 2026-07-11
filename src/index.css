@@ -653,3 +653,66 @@ body {
   cursor: pointer;
 }
 .budget-total-inline { font-size: 0.9rem; color: #1E3A5F; margin-left: 0.25rem; }
+
+/* --- Mega-project tracker --- */
+.proj-card {
+  border: 1px solid #e2e2e2;
+  border-radius: 10px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1.1rem;
+}
+.proj-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.4rem;
+}
+.proj-name { margin: 0; font-size: 1.15rem; }
+.proj-desc { font-size: 0.9rem; color: #444; margin: 0.6rem 0; }
+
+/* The slippage line. Red on purpose - this is the accountability number. */
+.proj-slip {
+  background: #fdf0ef;
+  border-left: 3px solid #B3261E;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.87rem;
+  color: #7a1a15;
+  margin: 0.7rem 0;
+  border-radius: 0 4px 4px 0;
+}
+
+.proj-meta { margin-top: 0.8rem; }
+.proj-bar-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+}
+.proj-label { color: #777; }
+.proj-val { font-weight: 600; color: #1E3A5F; }
+.proj-bar {
+  height: 7px;
+  background: #ececec;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.7rem;
+}
+.proj-bar-fill {
+  height: 100%;
+  background: #1B7A3D;
+  border-radius: 4px;
+}
+
+.proj-toggle {
+  background: none;
+  border: none;
+  color: #1E3A5F;
+  font: inherit;
+  font-size: 0.87rem;
+  cursor: pointer;
+  padding: 0.4rem 0;
+  text-decoration: underline;
+}
+.proj-toggle:hover { opacity: 0.75; }

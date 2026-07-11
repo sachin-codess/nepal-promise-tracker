@@ -76,3 +76,34 @@ export async function fetchBudgetYears() {
     .sort((a, b) => b.ad.localeCompare(a.ad));
   return { data: years, error: null };
 }
+
+
+// Fetch mega-projects: long-running national infrastructure that outlives
+// the politicians who promised it. Newest start date first.
+export async function fetchProjects() {
+  if (!supabase) {
+    await new Promise((r) => setTimeout(r, 150));
+    return { data: [], error: null };
+  }
+  const { data, error } = await supabase
+    .from("mega_projects")
+    .select("*")
+    .order("start_date", { ascending: false });
+  return { data: data ?? [], error };
+}
+
+// Fetch project milestones - the slippage record. Pass a projectId for one
+// project's chain, or call with no argument to load all at once.
+export async function fetchMilestones(projectId) {
+  if (!supabase) {
+    await new Promise((r) => setTimeout(r, 150));
+    return { data: [], error: null };
+  }
+  let query = supabase
+    .from("project_milestones")
+    .select("*")
+    .order("event_date", { ascending: true });
+  if (projectId != null) query = query.eq("project_id", projectId);
+  const { data, error } = await query;
+  return { data: data ?? [], error };
+}

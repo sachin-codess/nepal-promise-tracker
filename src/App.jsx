@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useLang, useT } from "./lib/i18n";
-import { fetchPromises, fetchEvents, isLiveDatabase } from "./lib/supabase";
+import { fetchPromises, fetchEvents, isLiveDatabase, fetchProjects, fetchMilestones } from "./lib/supabase";
 import StatsBar from "./components/StatsBar";
 import Controls from "./components/Controls";
 import PromiseCard from "./components/PromiseCard";
@@ -11,6 +11,7 @@ import TimelineModal from "./components/TimelineModal";
 import AnalyticsModal from "./components/AnalyticsModal";
 import MapModal from "./components/MapModal";
 import BudgetModal from "./components/BudgetModal";
+import ProjectsModal from "./components/ProjectsModal";
 
 export default function App() {
   const [promises, setPromises] = useState([]);
@@ -25,6 +26,10 @@ export default function App() {
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [showBudget, setShowBudget] = useState(false);
+  const [showProjects, setShowProjects] = useState(false);
+  const [projects, setProjects] = useState([]);
+  const [milestones, setMilestones] = useState([]);
+  const [projLoading, setProjLoading] = useState(true);
   const { lang, setLang } = useLang();
   const t = useT();
   const [province, setProvince] = useState("all");
@@ -44,6 +49,12 @@ export default function App() {
       // Events load separately; the app works fine even if this is empty.
       const ev = await fetchEvents();
       if (!cancelled && ev.data) setEvents(ev.data);
+      // Mega-projects load separately too.
+      const pr = await fetchProjects();
+      if (!cancelled && pr.data) setProjects(pr.data);
+      const ms = await fetchMilestones();
+      if (!cancelled && ms.data) setMilestones(ms.data);
+      if (!cancelled) setProjLoading(false);
     })();
     return () => { cancelled = true; };
   }, []);
@@ -121,6 +132,9 @@ export default function App() {
           </button>
           <button className="map-btn" onClick={() => setShowBudget(true)}>
             {t("budgetBtn")}
+          </button>
+          <button className="map-btn" onClick={() => setShowProjects(true)}>
+            {t("projectsBtn")}
           </button>
           <button className="analytics-btn" onClick={() => setShowAnalytics(true)}>
             {t("analytics")}
@@ -207,6 +221,13 @@ export default function App() {
       <AnalyticsModal open={showAnalytics} promises={promises} onClose={() => setShowAnalytics(false)} />
       <MapModal open={showMap} promises={promises} onProvinceClick={(name) => { setProvince(name); setShowMap(false); }} onClose={() => setShowMap(false)} />
       <BudgetModal open={showBudget} onClose={() => setShowBudget(false)} />
+      <ProjectsModal
+        open={showProjects}
+        onClose={() => setShowProjects(false)}
+        projects={projects}
+        milestones={milestones}
+        loading={projLoading}
+      />
     </div>
   );
 }
