@@ -72,6 +72,8 @@ export const STRINGS = {
     tlProgress: "Progress",
     tlEvidence: "Evidence",
     promisesLabel: "Promises",
+    mapAria: "Map of Nepal provinces",
+    mapLegendA: "Darker = more promises tracked. National (\"Federal\") promises:",
     analyticsTitle: "Promise analytics",
     donutAria: "Status breakdown donut chart",
     donutCenter: "promises",
@@ -175,6 +177,8 @@ export const STRINGS = {
     tlProgress: "प्रगति",
     tlEvidence: "\u092a\u094d\u0930\u092e\u093e\u0923",
     promisesLabel: "वाचाहरू",
+    mapAria: "नेपालका प्रदेशहरूको नक्सा",
+    mapLegendA: "गाढा = बढी वाचा अभिलेख गरिएको। राष्ट्रिय (\"संघीय\") वाचाहरू:",
     analyticsTitle: "वाचा तथ्याङ्क",
     donutAria: "स्थिति विभाजन डोनट चार्ट",
     donutCenter: "वाचा",
@@ -256,6 +260,23 @@ export function useCat() {
     );
     return known ?? tidy(c);
   };
+}
+
+// Province names come from the DB / GeoJSON keys (English). Display-only, like categories.
+export const PROVINCE_NE = {
+  "Koshi": "कोशी",
+  "Madhesh": "मधेश",
+  "Bagmati": "बागमती",
+  "Gandaki": "गण्डकी",
+  "Lumbini": "लुम्बिनी",
+  "Karnali": "कर्णाली",
+  "Sudurpashchim": "सुदूरपश्चिम",
+  "Federal": "संघीय",
+};
+
+export function useProv() {
+  const { lang } = useLang();
+  return (p) => (lang === "ne" ? PROVINCE_NE[p] ?? p : p);
 }
 
 export const LangContext = createContext({ lang: "en", setLang: () => {} });

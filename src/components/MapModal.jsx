@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { PROVINCE_PATHS } from "./provincePaths";
+import { useT, useProv } from "../lib/i18n";
 
 // Real Nepal province boundaries (source: mesaugat/geoJSON-Nepal, ADM1 2017),
 // projected + simplified to an 800x400 SVG. Keyed by province name.
@@ -26,6 +27,8 @@ function shade(count, max) {
 }
 
 export default function MapModal({ open, promises, onProvinceClick, onClose }) {
+  const t = useT();
+  const prov = useProv();
   const [hover, setHover] = useState(null);
 
   useEffect(() => {
@@ -53,14 +56,14 @@ export default function MapModal({ open, promises, onProvinceClick, onClose }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal modal-wide" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose} aria-label="Close">×</button>
-        <h2 className="tl-title">Promises by province</h2>
+        <button className="modal-close" onClick={onClose} aria-label={t("close")}>×</button>
+        <h2 className="tl-title">{t("promisesByProvince")}</h2>
         <p className="tl-sub">
-          Darker = more promises tracked. National ("Federal") promises: {counts.federal}.
+          {t("mapLegendA")} {counts.federal}
         </p>
 
         <div className="map-wrap">
-          <svg viewBox="0 0 800 400" className="map-svg" role="img" aria-label="Map of Nepal provinces">
+          <svg viewBox="0 0 800 400" className="map-svg" role="img" aria-label={t("mapAria")}>
             {Object.entries(PROVINCES).map(([name, d]) => (
               <path
                 key={name}
@@ -77,7 +80,7 @@ export default function MapModal({ open, promises, onProvinceClick, onClose }) {
             {Object.entries(LABELS).map(([name, [x, y]]) => (
               <text key={name} x={x} y={y} textAnchor="middle" className="map-label"
                     style={{ pointerEvents: "none" }}>
-                {name}
+                {prov(name)}
                 <tspan x={x} y={y + 15} className="map-count">{counts.m[name]}</tspan>
               </text>
             ))}
