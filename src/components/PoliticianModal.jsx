@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
+import { useT, useCat } from "../lib/i18n";
 
 /* PoliticianModal — one politician's facts: bio, party, position, promises. */
 export default function PoliticianModal({ politician, promises, onClose }) {
+  const t = useT();
+  const cat = useCat();
   const [filter, setFilter] = useState("all");
 
   useEffect(() => {
@@ -35,7 +38,7 @@ export default function PoliticianModal({ politician, promises, onClose }) {
 
   if (!politician || !info) return null;
 
-  const statusLabel = { kept: "Kept", broken: "Broken", in_progress: "In progress" };
+  const statusLabel = { kept: t("kept"), broken: t("broken"), in_progress: t("inProgress") };
   const statusClass = { kept: "chip-kept", broken: "chip-broken", in_progress: "chip-progress" };
 
   const pick = (key) => setFilter(filter === key ? "all" : key);
@@ -51,7 +54,7 @@ export default function PoliticianModal({ politician, promises, onClose }) {
         onClick={(e) => e.stopPropagation()}
         style={{ borderTopColor: info.color }}
       >
-        <button className="modal-close" onClick={onClose} aria-label="Close">×</button>
+        <button className="modal-close" onClick={onClose} aria-label={t("close")}>×</button>
 
         <h2 id="pol-title" className="modal-title" style={{ color: info.color }}>
           {politician}
@@ -71,7 +74,7 @@ export default function PoliticianModal({ politician, promises, onClose }) {
             onClick={() => setFilter("all")}
           >
             <span className="party-stat-num">{info.total}</span>
-            <span className="party-stat-label">Promises</span>
+            <span className="party-stat-label">{t("promisesLabel")}</span>
           </button>
           <button
             type="button"
@@ -79,7 +82,7 @@ export default function PoliticianModal({ politician, promises, onClose }) {
             onClick={() => pick("kept")}
           >
             <span className="party-stat-num" style={{ color: "#1a7a3c" }}>{info.counts.kept}</span>
-            <span className="party-stat-label">Kept</span>
+            <span className="party-stat-label">{t("kept")}</span>
           </button>
           <button
             type="button"
@@ -87,7 +90,7 @@ export default function PoliticianModal({ politician, promises, onClose }) {
             onClick={() => pick("broken")}
           >
             <span className="party-stat-num" style={{ color: "#c0281f" }}>{info.counts.broken}</span>
-            <span className="party-stat-label">Broken</span>
+            <span className="party-stat-label">{t("broken")}</span>
           </button>
           <button
             type="button"
@@ -95,25 +98,25 @@ export default function PoliticianModal({ politician, promises, onClose }) {
             onClick={() => pick("in_progress")}
           >
             <span className="party-stat-num" style={{ color: "#a5730a" }}>{info.counts.in_progress}</span>
-            <span className="party-stat-label">In progress</span>
+            <span className="party-stat-label">{t("inProgress")}</span>
           </button>
         </div>
 
         <section className="modal-section">
-          <h3>Promises ({shown.length}{filter !== "all" ? ` of ${info.total}` : ""})</h3>
+          <h3>{t("promisesH")} ({shown.length}{filter !== "all" ? ` ${t("ofTotal")} ${info.total}` : ""})</h3>
           <ul className="party-promise-list">
             {shown.map((p) => (
               <li key={p.id} className="party-promise">
                 <div className="party-promise-top">
                   <span className={`chip ${statusClass[p.status]}`}>{statusLabel[p.status]}</span>
-                  <span className="party-promise-cat">{p.category}</span>
+                  <span className="party-promise-cat">{cat(p.category)}</span>
                 </div>
                 <p className="party-promise-text">"{p.promise}"</p>
                 <div className="party-promise-meta">
                   <span>{p.date_made ? new Date(p.date_made + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : ""}</span>
                   {p.source_url && (
                     <a href={p.source_url} target="_blank" rel="noopener noreferrer">
-                      View source →
+                      {t("viewSource")}
                     </a>
                   )}
                 </div>
