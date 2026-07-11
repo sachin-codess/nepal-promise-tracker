@@ -64,6 +64,12 @@ export const STRINGS = {
     notH: "What this is not",
     notP: "This is an independent project. It is not affiliated with, funded by, or endorsed by any political party, candidate, or government body. It exists to inform — not to campaign for or against anyone.",
     close: "Close",
+    tlTitle: "Evidence timeline",
+    tlEmpty: "No timeline events recorded yet for this promise.",
+    tlSource: "Source →",
+    tlMade: "Promised",
+    tlProgress: "Progress",
+    tlEvidence: "Evidence",
   },
   ne: {
     tagline: "के वाचा गरियो। के पूरा भयो। स्रोतसहित।",
@@ -127,6 +133,12 @@ export const STRINGS = {
     notH: "यो के होइन",
     notP: "यो एक स्वतन्त्र परियोजना हो। यो कुनै पनि राजनीतिक दल, उम्मेदवार वा सरकारी निकायसँग सम्बद्ध, तिनबाट वित्तपोषित वा अनुमोदित होइन। यो जानकारी दिन बनेको हो — कसैको पक्ष वा विपक्षमा प्रचार गर्न होइन।",
     close: "बन्द गर्नुहोस्",
+    tlTitle: "प्रमाणको समयरेखा",
+    tlEmpty: "यस वाचाका लागि अहिलेसम्म कुनै घटना अभिलेख गरिएको छैन।",
+    tlSource: "स्रोत →",
+    tlMade: "वाचा गरिएको",
+    tlProgress: "प्रगति",
+    tlEvidence: "प्रमाण",
   },
 };
 

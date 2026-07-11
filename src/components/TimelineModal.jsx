@@ -1,21 +1,26 @@
 import { useEffect } from "react";
+import { useT, useLang } from "../lib/i18n";
 
 const TYPE_META = {
-  made:     { color: "#1E3A5F", label: "Promised" },
-  progress: { color: "#C77D00", label: "Progress" },
-  kept:     { color: "#1B7A3D", label: "Kept" },
-  broken:   { color: "#B3261E", label: "Broken" },
-  evidence: { color: "#555555", label: "Evidence" },
+  made:     { color: "#1E3A5F", key: "tlMade" },
+  progress: { color: "#C77D00", key: "tlProgress" },
+  kept:     { color: "#1B7A3D", key: "kept" },
+  broken:   { color: "#B3261E", key: "broken" },
+  evidence: { color: "#555555", key: "tlEvidence" },
 };
 
-function fmtDate(d) {
+function fmtDate(d, lang) {
   if (!d) return "";
-  return new Date(d + "T00:00:00").toLocaleDateString("en-GB", {
-    day: "numeric", month: "short", year: "numeric",
-  });
+  return new Date(d + "T00:00:00").toLocaleDateString(
+    lang === "ne" ? "ne-NP" : "en-GB",
+    { day: "numeric", month: "short", year: "numeric" }
+  );
 }
 
 export default function TimelineModal({ promise, events, onClose }) {
+  const t = useT();
+  const { lang } = useLang();
+
   useEffect(() => {
     const onKey = (e) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -31,13 +36,13 @@ export default function TimelineModal({ promise, events, onClose }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose} aria-label="Close">×</button>
-        <h2 className="tl-title">Evidence timeline</h2>
+        <button className="modal-close" onClick={onClose} aria-label={t("close")}>×</button>
+        <h2 className="tl-title">{t("tlTitle")}</h2>
         <p className="tl-promise">“{promise.promise}”</p>
         <p className="tl-sub">{promise.politician}{promise.party ? ` · ${promise.party}` : ""}</p>
 
         {sorted.length === 0 ? (
-          <p className="empty">No timeline events recorded yet for this promise.</p>
+          <p className="empty">{t("tlEmpty")}</p>
         ) : (
           <ol className="tl-list">
             {sorted.map((ev) => {
@@ -47,16 +52,16 @@ export default function TimelineModal({ promise, events, onClose }) {
                   <span className="tl-dot" style={{ background: meta.color }} />
                   <div className="tl-body">
                     <div className="tl-row">
-                      <span className="tl-date">{fmtDate(ev.event_date)}</span>
+                      <span className="tl-date">{fmtDate(ev.event_date, lang)}</span>
                       <span className="tl-tag" style={{ color: meta.color, borderColor: meta.color }}>
-                        {meta.label}
+                        {t(meta.key)}
                       </span>
                     </div>
                     <div className="tl-event-title">{ev.title}</div>
                     {ev.description && <p className="tl-desc">{ev.description}</p>}
                     {ev.source_url && (
                       <a className="tl-source" href={ev.source_url} target="_blank" rel="noreferrer">
-                        Source →
+                        {t("tlSource")}
                       </a>
                     )}
                   </div>
