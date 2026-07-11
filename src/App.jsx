@@ -212,6 +212,10 @@ export default function App() {
 
       <footer className="footer">
         {t("footer")}
+        {" "}
+        <a className="api-link" href="/api/v1" target="_blank" rel="noreferrer">
+          {t("apiLink")} →
+        </a>
       </footer>
 
       <AboutModal open={showAbout} onClose={() => setShowAbout(false)} />

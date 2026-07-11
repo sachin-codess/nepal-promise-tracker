@@ -71,6 +71,8 @@ export const STRINGS = {
     tlProgress: "Progress",
     tlEvidence: "Evidence",
     projectsBtn: "Projects",
+    apiLink: "Open data API",
+    apiLink: "Open data API",
     projectsTitle: "Mega-projects",
     projectsLead: "National infrastructure that outlives the politicians who promised it. Every missed deadline, on the record.",
     projLoading: "Loading projects\u2026",

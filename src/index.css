@@ -716,3 +716,10 @@ body {
   text-decoration: underline;
 }
 .proj-toggle:hover { opacity: 0.75; }
+
+.api-link {
+  color: #1E3A5F;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+.api-link:hover { opacity: 0.7; }
