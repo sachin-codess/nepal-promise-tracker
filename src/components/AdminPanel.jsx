@@ -13,6 +13,13 @@ export default function AdminPanel() {
   const [sourceUrl, setSourceUrl] = useState("");
   const [drafting, setDrafting] = useState(false);
 
+  // Public submissions queue (separate table, separate route)
+  const [subs, setSubs] = useState([]);
+  const [subsLoading, setSubsLoading] = useState(true);
+  const [subsMsg, setSubsMsg] = useState("");
+  const [subBusyId, setSubBusyId] = useState(null);
+  const ADMIN_TOKEN = import.meta.env.VITE_ADMIN_TOKEN;
+
   // Call our serverless function to extract promise drafts from pasted text,
   // then insert each draft into `pending_promises` for review below.
   async function draftFromArticle() {
@@ -69,6 +76,47 @@ export default function AdminPanel() {
     setDrafting(false);
   }
 
+  async function loadSubs() {
+    if (!ADMIN_TOKEN) {
+      setSubsMsg("VITE_ADMIN_TOKEN not set \u2014 cannot load submissions.");
+      setSubsLoading(false);
+      return;
+    }
+    setSubsLoading(true);
+    try {
+      const r = await fetch(`/api/admin/submissions?token=${encodeURIComponent(ADMIN_TOKEN)}`);
+      const j = await r.json();
+      if (!r.ok) { setSubsMsg(j.error || "Failed to load submissions."); setSubs([]); }
+      else { setSubs(j.data || []); setSubsMsg(""); }
+    } catch (e) {
+      setSubsMsg("Failed to reach the moderation route. Are you running `vercel dev`?");
+    }
+    setSubsLoading(false);
+  }
+
+  async function moderate(row, action) {
+    setSubBusyId(row.id);
+    setSubsMsg("");
+    try {
+      const r = await fetch("/api/admin/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: ADMIN_TOKEN, id: row.id, action }),
+      });
+      const j = await r.json();
+      if (!r.ok) setSubsMsg(j.error || "Action failed.");
+      else {
+        setSubsMsg(action === "approve"
+          ? `Approved \u2014 promise #${row.id} is now live.`
+          : `Rejected submission #${row.id}.`);
+        await loadSubs();
+      }
+    } catch (e) {
+      setSubsMsg("Request failed.");
+    }
+    setSubBusyId(null);
+  }
+
   async function load() {
     if (!supabase) {
       setMsg("Supabase not configured — admin needs the live database.");
@@ -85,7 +133,8 @@ export default function AdminPanel() {
     setLoading(false);
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load();
+    loadSubs(); }, []);
 
   // Approve: resolve party + politician to their IDs, insert into `promises`,
   // then remove the draft. We DO NOT touch status logic — you already set it.
@@ -229,6 +278,65 @@ export default function AdminPanel() {
                 {busyId === row.id ? "…" : "Approve"}
               </button>
               <button onClick={() => reject(row)} disabled={busyId === row.id}
+                style={{ background: "#fff", color: "#b71c1c", border: "1px solid #b71c1c",
+                  padding: "0.5rem 1.1rem", borderRadius: 6, cursor: "pointer" }}>
+                Reject
+              </button>
+            </div>
+          </div>
+        ))
+      )}
+
+      <hr style={{ margin: "2.5rem 0 1.5rem", border: "none", borderTop: "1px solid #ddd" }} />
+
+      <h2 style={{ color: "#8f2f30" }}>Public submissions</h2>
+      <p style={{ color: "#555" }}>
+        Sent in by the public. Open the source and check it actually says what the
+        submission claims. Approving inserts into the live table as <b>in progress</b> —
+        never as kept or broken. If the politician isn't in the database yet, add them
+        first, then approve.
+      </p>
+
+      {subsMsg && (
+        <div style={{ margin: "0.75rem 0", padding: "0.6rem 0.9rem", borderRadius: 6,
+          background: "#fcf8e3", color: "#8a6d3b", fontSize: "0.9rem" }}>
+          {subsMsg}
+        </div>
+      )}
+
+      {subsLoading ? (
+        <p style={{ color: "#777" }}>Loading submissions…</p>
+      ) : subs.length === 0 ? (
+        <p style={{ color: "#777" }}>No pending submissions.</p>
+      ) : (
+        subs.map((row) => (
+          <div key={row.id} style={{ border: "1px solid #ddd", borderRadius: 10,
+            padding: "1rem 1.25rem", margin: "1rem 0", background: "#fff" }}>
+            <div style={{ fontWeight: 600, fontSize: "1.05rem" }}>{row.politician_name}</div>
+            <div style={{ margin: "8px 0", fontStyle: "italic" }}>"{row.promise}"</div>
+            <div style={{ fontSize: "0.88rem", color: "#666" }}>
+              {row.category || "no category"} · {row.province || "Federal"}
+              {row.date_made && ` · promised ${row.date_made}`}
+              {row.deadline && ` · deadline ${row.deadline}`}
+            </div>
+            <div style={{ marginTop: 6, fontSize: "0.9rem" }}>
+              <a href={row.source_url} target="_blank" rel="noopener noreferrer">
+                {row.source_url}
+              </a>
+            </div>
+            {row.notes && (
+              <div style={{ marginTop: 6, fontSize: "0.85rem", color: "#555",
+                background: "#f5f5f5", padding: "0.5rem 0.75rem", borderRadius: 6 }}>
+                Submitter note: {row.notes}
+              </div>
+            )}
+            <div style={{ marginTop: 12, display: "flex", gap: 10 }}>
+              <button onClick={() => moderate(row, "approve")} disabled={subBusyId === row.id}
+                style={{ background: "#2e7d32", color: "#fff", border: "none",
+                  padding: "0.5rem 1.1rem", borderRadius: 6, cursor: "pointer" }}>
+                {subBusyId === row.id ? "…" : "Approve"}
+              </button>
+              <button onClick={() => moderate(row, "reject")} disabled={subBusyId === row.id}
                 style={{ background: "#fff", color: "#b71c1c", border: "1px solid #b71c1c",
                   padding: "0.5rem 1.1rem", borderRadius: 6, cursor: "pointer" }}>
                 Reject
