@@ -723,3 +723,85 @@ body {
   white-space: nowrap;
 }
 .api-link:hover { opacity: 0.7; }
+
+/* --- Submit a promise ------------------------------------------------ */
+.sub-modal { max-width: 720px; }
+
+.sub-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 18px;
+  margin: 20px 0 6px;
+}
+
+.sub-field { display: flex; flex-direction: column; gap: 5px; }
+.sub-field.sub-wide { grid-column: 1 / -1; }
+
+.sub-field > span {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1E3A5F;
+  letter-spacing: 0.01em;
+}
+
+.sub-field > span em {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 0.72rem;
+  color: #8a8378;
+  margin-left: 4px;
+}
+
+.sub-field input,
+.sub-field select,
+.sub-field textarea {
+  font: inherit;
+  font-size: 0.92rem;
+  padding: 8px 10px;
+  border: 1px solid #d8d2c7;
+  border-radius: 6px;
+  background: #fdfcfa;
+  color: #2b2b2b;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.sub-field textarea { resize: vertical; line-height: 1.45; }
+
+.sub-field input:focus,
+.sub-field select:focus,
+.sub-field textarea:focus {
+  outline: none;
+  border-color: #1E3A5F;
+  box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.12);
+}
+
+.sub-send {
+  margin-top: 16px;
+  padding: 10px 22px;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: #fff;
+  background: #1E3A5F;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.sub-send:hover:not(:disabled) { background: #16304e; }
+.sub-send:disabled { background: #b8b2a8; cursor: not-allowed; }
+
+.sub-err {
+  margin: 12px 0 0;
+  font-size: 0.88rem;
+  color: #c0281f;
+}
+
+.sub-done { padding: 28px 0 8px; text-align: center; }
+.sub-ok { font-size: 1.02rem; color: #1a7a3c; margin: 0 0 18px; }
+
+@media (max-width: 640px) {
+  .sub-grid { grid-template-columns: 1fr; }
+}

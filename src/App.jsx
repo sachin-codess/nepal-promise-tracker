@@ -12,6 +12,7 @@ import AnalyticsModal from "./components/AnalyticsModal";
 import MapModal from "./components/MapModal";
 import BudgetModal from "./components/BudgetModal";
 import ProjectsModal from "./components/ProjectsModal";
+import SubmitModal from "./components/SubmitModal";
 
 export default function App() {
   const [promises, setPromises] = useState([]);
@@ -27,6 +28,7 @@ export default function App() {
   const [showMap, setShowMap] = useState(false);
   const [showBudget, setShowBudget] = useState(false);
   const [showProjects, setShowProjects] = useState(false);
+  const [showSubmit, setShowSubmit] = useState(false);
   const [projects, setProjects] = useState([]);
   const [milestones, setMilestones] = useState([]);
   const [projLoading, setProjLoading] = useState(true);
@@ -136,6 +138,9 @@ export default function App() {
           <button className="map-btn" onClick={() => setShowProjects(true)}>
             {t("projectsBtn")}
           </button>
+          <button className="map-btn" onClick={() => setShowSubmit(true)}>
+            {t("submitBtn")}
+          </button>
           <button className="analytics-btn" onClick={() => setShowAnalytics(true)}>
             {t("analytics")}
           </button>
@@ -232,6 +237,7 @@ export default function App() {
         milestones={milestones}
         loading={projLoading}
       />
+      <SubmitModal open={showSubmit} onClose={() => setShowSubmit(false)} />
     </div>
   );
 }
