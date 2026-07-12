@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { useT, useCat } from "../lib/i18n";
+import { useT, useCat, useNe } from "../lib/i18n";
 
 /* PartyModal — one party's track record: stats, politicians, promises. */
 export default function PartyModal({ party, promises, onClose }) {
   const t = useT();
+  const ne = useNe();
   const cat = useCat();
   const [filter, setFilter] = useState("all");
 
@@ -117,7 +118,7 @@ export default function PartyModal({ party, promises, onClose }) {
                   <span className={`chip ${statusClass[p.status]}`}>{statusLabel[p.status]}</span>
                   <span className="party-promise-cat">{cat(p.category)}</span>
                 </div>
-                <p className="party-promise-text">"{p.promise}"</p>
+                <p className="party-promise-text">"{ne(p, "promise")}"</p>
                 <div className="party-promise-meta">
                   <span>{p.politician}</span>
                   {p.source_url && (

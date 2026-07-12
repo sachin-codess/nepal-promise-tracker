@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { useT, useCat, useDate } from "../lib/i18n";
+import { useT, useCat, useDate, useNe } from "../lib/i18n";
 
 /* PoliticianModal — one politician's facts: bio, party, position, promises. */
 export default function PoliticianModal({ politician, promises, onClose }) {
   const t = useT();
+  const ne = useNe();
   const cat = useCat();
   const fmtDate = useDate();
   const [filter, setFilter] = useState("all");
@@ -112,7 +113,7 @@ export default function PoliticianModal({ politician, promises, onClose }) {
                   <span className={`chip ${statusClass[p.status]}`}>{statusLabel[p.status]}</span>
                   <span className="party-promise-cat">{cat(p.category)}</span>
                 </div>
-                <p className="party-promise-text">"{p.promise}"</p>
+                <p className="party-promise-text">"{ne(p, "promise")}"</p>
                 <div className="party-promise-meta">
                   <span>{fmtDate(p.date_made)}</span>
                   {p.source_url && (

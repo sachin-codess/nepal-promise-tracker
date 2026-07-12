@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useT, useLang, fmtDate } from "../lib/i18n";
+import { useT, useLang, fmtDate, useNe } from "../lib/i18n";
 
 const TYPE_META = {
   made:     { color: "#1E3A5F", key: "tlMade" },
@@ -12,6 +12,7 @@ const TYPE_META = {
 
 export default function TimelineModal({ promise, events, onClose }) {
   const t = useT();
+  const ne = useNe();
   const { lang } = useLang();
 
   useEffect(() => {
@@ -31,7 +32,7 @@ export default function TimelineModal({ promise, events, onClose }) {
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <button className="modal-close" onClick={onClose} aria-label={t("close")}>×</button>
         <h2 className="tl-title">{t("tlTitle")}</h2>
-        <p className="tl-promise">“{promise.promise}”</p>
+        <p className="tl-promise">“{ne(promise, "promise")}”</p>
         <p className="tl-sub">{promise.politician}{promise.party ? ` · ${promise.party}` : ""}</p>
 
         {sorted.length === 0 ? (

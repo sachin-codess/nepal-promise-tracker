@@ -82,7 +82,7 @@ export default function App() {
       if (status !== "all" && p.status !== status) return false;
       if (province !== "all" && p.province !== province) return false;
       if (q) {
-        const hay = `${p.politician} ${p.promise} ${p.party ?? ""}`.toLowerCase();
+        const hay = `${p.politician} ${p.promise} ${p.promise_ne ?? ""} ${p.party ?? ""}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;

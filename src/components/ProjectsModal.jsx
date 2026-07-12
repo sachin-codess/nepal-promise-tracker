@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useT, useLang, useCat, fmtDate } from "../lib/i18n";
+import { useT, useLang, useCat, useNe, fmtDate } from "../lib/i18n";
 
 const EV_META = {
   start:      { color: "#1E3A5F", key: "projStart" },
@@ -44,6 +44,7 @@ export default function ProjectsModal({ open, onClose, projects, milestones, loa
   const t = useT();
   const cat = useCat();
   const { lang } = useLang();
+  const ne = useNe();
   const [openId, setOpenId] = useState(null);
 
   useEffect(() => {
@@ -74,7 +75,7 @@ export default function ProjectsModal({ open, onClose, projects, milestones, loa
           <p className="empty">{t("projEmpty")}</p>
         ) : (
           projects.map((p) => {
-            const name = lang === "ne" && p.name_ne ? p.name_ne : p.name;
+            const name = ne(p, "name");
             const slip = yearsBetween(p.original_deadline, p.current_deadline);
             const over = overrun(p.budget_original, p.budget_allocated);
             const evs = milestones.filter((m) => m.project_id === p.id);
@@ -91,7 +92,7 @@ export default function ProjectsModal({ open, onClose, projects, milestones, loa
                 </div>
 
                 {p.sector && <span className="chip">{cat(p.sector)}</span>}
-                {p.description && <p className="proj-desc">{p.description}</p>}
+                {p.description && <p className="proj-desc">{ne(p, "description")}</p>}
 
                 {/* The slippage line — the whole point of this feature. */}
                 {slip != null && slip > 0 && (
@@ -163,8 +164,8 @@ export default function ProjectsModal({ open, onClose, projects, milestones, loa
                                     {t(meta.key)}
                                   </span>
                                 </div>
-                                <div className="tl-event-title">{ev.title}</div>
-                                {ev.description && <p className="tl-desc">{ev.description}</p>}
+                                <div className="tl-event-title">{ne(ev, "title")}</div>
+                                {ev.description && <p className="tl-desc">{ne(ev, "description")}</p>}
                                 {ev.source_url && (
                                   <a className="tl-source" href={ev.source_url} target="_blank" rel="noreferrer">
                                     {t("projSource")}

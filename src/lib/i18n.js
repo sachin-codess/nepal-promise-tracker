@@ -269,6 +269,7 @@ export const CATEGORY_NE = {
   "Environment": "वातावरण",
   "Employment": "रोजगारी",
   "Tourism": "पर्यटन",
+  "Transport": "यातायात",
   "Governance": "सुशासन",
   "Anti-corruption": "भ्रष्टाचारविरुद्ध",
   "Social Welfare": "सामाजिक कल्याण",
@@ -334,6 +335,19 @@ export function fmtDate(d, lang) {
 }
 
 // Hook form: const fd = useDate(); fd(p.date_made)
+// Display-only content fallback. Returns the Nepali column when the UI is in
+// Nepali AND a translation exists; otherwise the English original. Untranslated
+// rows keep showing English rather than a blank — so translation can be
+// incremental and a missing row is never a broken row.
+export function useNe() {
+  const { lang } = useLang();
+  return (row, field) => {
+    if (!row) return "";
+    if (lang === "ne" && row[field + "_ne"]) return row[field + "_ne"];
+    return row[field] ?? "";
+  };
+}
+
 export function useDate() {
   const { lang } = useLang();
   return (d) => fmtDate(d, lang);

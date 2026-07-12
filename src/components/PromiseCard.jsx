@@ -1,11 +1,12 @@
 import StatusPennant from "./StatusPennant";
 import BudgetBar from "./BudgetBar";
-import { useT, useCat, useDate } from "../lib/i18n";
+import { useT, useCat, useDate, useNe } from "../lib/i18n";
 
 export default function PromiseCard({ p, onPartyClick, onPoliticianClick, eventCount = 0, onTimelineClick }) {
   const t = useT();
   const cat = useCat();
   const fmtDate = useDate();
+  const ne = useNe();
   return (
     <article className="card">
       <div className="card-top">
@@ -28,7 +29,7 @@ export default function PromiseCard({ p, onPartyClick, onPoliticianClick, eventC
         <StatusPennant status={p.status} />
       </div>
 
-      <p className="card-promise">“{p.promise}”</p>
+      <p className="card-promise">“{ne(p, "promise")}”</p>
 
       <div className="card-dates">
         <span className="chip">{cat(p.category)}</span>
@@ -36,7 +37,7 @@ export default function PromiseCard({ p, onPartyClick, onPoliticianClick, eventC
         {p.deadline && <span>{t("deadline")} {fmtDate(p.deadline)}</span>}
       </div>
 
-      {p.evidence && <p className="card-evidence">{p.evidence}</p>}
+      {p.evidence && <p className="card-evidence">{ne(p, "evidence")}</p>}
 
       <BudgetBar p={p} />
 
