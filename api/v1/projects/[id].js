@@ -1,5 +1,5 @@
 // GET /api/v1/projects/:id
-// One project with its full milestone chain — the delay record.
+// One project with its full milestone chain — the delay record, and the cost record.
 
 import { db, ok, fail, guard } from "../../_lib/db.js";
 
@@ -8,6 +8,18 @@ function yearsSlipped(original, current) {
   const ms = new Date(current) - new Date(original);
   if (ms <= 0) return 0;
   return Math.round((ms / (1000 * 60 * 60 * 24 * 365.25)) * 10) / 10;
+}
+
+// null (not 0) when there is no approved original estimate to overrun from —
+// a quashed project has no baseline, and null lets the UI hide the bar.
+function costOverrun(original, allocated) {
+  if (original == null || allocated == null) return { npr: null, pct: null };
+  const npr = Number(allocated) - Number(original);
+  if (npr <= 0) return { npr: 0, pct: 0 };
+  return {
+    npr,
+    pct: Math.round((npr / Number(original)) * 1000) / 10,
+  };
 }
 
 export default async function handler(req, res) {
@@ -31,9 +43,13 @@ export default async function handler(req, res) {
     .eq("project_id", id)
     .order("event_date", { ascending: true });
 
+  const over = costOverrun(project.budget_original, project.budget_allocated);
+
   return ok(res, {
     ...project,
     years_slipped: yearsSlipped(project.original_deadline, project.current_deadline),
+    cost_overrun_npr: over.npr,
+    cost_overrun_pct: over.pct,
     milestones: milestones ?? [],
   });
 }

@@ -23,17 +23,24 @@ export default async function handler(req, res) {
 
   const { data: projects } = await db
     .from("mega_projects")
-    .select("status, original_deadline, current_deadline");
+    .select("status, original_deadline, current_deadline, budget_original, budget_allocated");
 
   const rows = promises ?? [];
   const projRows = projects ?? [];
 
   // Total years of deadline slippage across all tracked mega-projects.
   let slipTotal = 0;
+  // Total cost overrun (NPR) across projects with a known original estimate.
+  let overrunTotal = 0;
   for (const p of projRows) {
-    if (!p.original_deadline || !p.current_deadline) continue;
-    const ms = new Date(p.current_deadline) - new Date(p.original_deadline);
-    if (ms > 0) slipTotal += ms / (1000 * 60 * 60 * 24 * 365.25);
+    if (p.original_deadline && p.current_deadline) {
+      const ms = new Date(p.current_deadline) - new Date(p.original_deadline);
+      if (ms > 0) slipTotal += ms / (1000 * 60 * 60 * 24 * 365.25);
+    }
+    if (p.budget_original != null && p.budget_allocated != null) {
+      const over = Number(p.budget_allocated) - Number(p.budget_original);
+      if (over > 0) overrunTotal += over;
+    }
   }
 
   return ok(res, {
@@ -50,6 +57,7 @@ export default async function handler(req, res) {
       total: projRows.length,
       by_status: tally(projRows, "status"),
       total_years_slipped: Math.round(slipTotal * 10) / 10,
+      total_cost_overrun_npr: overrunTotal,
     },
   });
 }

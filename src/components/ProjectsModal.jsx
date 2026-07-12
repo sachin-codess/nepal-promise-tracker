@@ -31,6 +31,15 @@ function yearsBetween(a, b) {
   return Math.round((ms / (1000 * 60 * 60 * 24 * 365.25)) * 10) / 10;
 }
 
+// The cost record. null (not 0) when there is no approved original estimate to
+// overrun from — a quashed project has no baseline, so the line hides itself.
+function overrun(original, allocated) {
+  if (original == null || allocated == null) return null;
+  const npr = Number(allocated) - Number(original);
+  if (npr <= 0) return null;
+  return { npr, pct: Math.round((npr / Number(original)) * 1000) / 10 };
+}
+
 export default function ProjectsModal({ open, onClose, projects, milestones, loading }) {
   const t = useT();
   const cat = useCat();
@@ -67,6 +76,7 @@ export default function ProjectsModal({ open, onClose, projects, milestones, loa
           projects.map((p) => {
             const name = lang === "ne" && p.name_ne ? p.name_ne : p.name;
             const slip = yearsBetween(p.original_deadline, p.current_deadline);
+            const over = overrun(p.budget_original, p.budget_allocated);
             const evs = milestones.filter((m) => m.project_id === p.id);
             const isOpen = openId === p.id;
             const pct = p.physical_progress_pct ?? 0;
@@ -91,6 +101,18 @@ export default function ProjectsModal({ open, onClose, projects, milestones, loa
                     {t("projOriginal")} {fmtDate(p.original_deadline, lang)}
                     {", "}
                     {t("projCurrent")} {fmtDate(p.current_deadline, lang)}
+                  </p>
+                )}
+
+                {/* The cost line. Sits beside slippage, never replaces it — a
+                    project can finish near-on-time and still be looted. */}
+                {over && (
+                  <p className="proj-slip">
+                    <strong>{t("projOverrun")} {fmtNpr(over.npr)} ({over.pct}%)</strong>
+                    {" \u2014 "}
+                    {t("projEstimated")} {fmtNpr(p.budget_original)}
+                    {", "}
+                    {t("projFinalCost")} {fmtNpr(p.budget_allocated)}
                   </p>
                 )}
 
