@@ -10,6 +10,7 @@ export default function AskModal({ open, onClose }) {
   const [turns, setTurns] = useState([]); // { role: 'user'|'ai', text }
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [stage, setStage] = useState(null); // which tool is running, for the status line
   const [error, setError] = useState(null);
   const endRef = useRef(null);
 
@@ -28,6 +29,7 @@ export default function AskModal({ open, onClose }) {
     setError(null);
     setTurns((prev) => [...prev, { role: "user", text: q }, { role: "ai", text: "" }]);
     setBusy(true);
+    setStage(null);
 
     try {
       const r = await fetch("/api/ask", {
@@ -45,6 +47,10 @@ export default function AskModal({ open, onClose }) {
       const decoder = new TextDecoder();
       let buf = "";
       let event = null;
+      // False until a tool call has run. Before that, any text is a guess the
+      // model may be about to overwrite — hold it back rather than flash it.
+      let settled = false;
+      const flush = [];
 
       // Append each token to the last turn as it arrives. On `reset` the
       // model turned out to be calling a tool, so whatever it wrote first
@@ -79,8 +85,20 @@ export default function AskModal({ open, onClose }) {
             continue;
           }
 
-          if (event === "token") patchLast((t) => t + payload.text);
-          if (event === "reset") patchLast(() => "");
+          if (event === "token") {
+            if (settled) patchLast((t) => t + payload.text);
+            else flush.push(payload.text); // hold: might be a pre-tool guess
+          }
+          if (event === "tool" || event === "reset") {
+            settled = true;   // any text after a tool call is the real answer
+            flush.length = 0; // drop the guess entirely — it never rendered
+            const key = payload.name || payload.reason;
+            if (key) setStage(key);
+          }
+          if (event === "done" && !settled) {
+            // No tool was called: the held text WAS the answer. Paint it.
+            patchLast(() => flush.join(""));
+          }
           if (event === "error") throw new Error(payload.message);
         }
       }
@@ -89,6 +107,7 @@ export default function AskModal({ open, onClose }) {
       setTurns((prev) => prev.filter((t, i) => !(i === prev.length - 1 && t.role === "ai" && !t.text)));
     } finally {
       setBusy(false);
+      setStage(null);
     }
   }
 
@@ -122,7 +141,15 @@ export default function AskModal({ open, onClose }) {
 
           {busy && !turns[turns.length - 1]?.text && (
             <div className="ask-turn ask-ai ask-busy">
-              <p>{t("askThinking")}</p>
+              <p>
+                {stage === "search_promises"
+                  ? t("askStagePromises")
+                  : stage === "get_projects"
+                  ? t("askStageProjects")
+                  : stage === "get_stats"
+                  ? t("askStageStats")
+                  : t("askThinking")}
+              </p>
             </div>
           )}
           {error && <div className="ask-error">{error}</div>}
