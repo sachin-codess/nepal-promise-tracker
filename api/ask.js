@@ -43,14 +43,8 @@ const TOOLS = [
   {
     name: "get_projects",
     description:
-      "Get mega-projects (Fast Track, Melamchi, Nijgadh, Pokhara Airport) with deadline slippage, cost overrun, and their milestone history. Use for questions about infrastructure projects, delays, or what happened to a specific project.",
-    input_schema: {
-      type: "object",
-      properties: {
-        name: { type: "string", description: "Project name, partial match allowed." },
-        include_milestones: { type: "boolean", description: "Include the dated milestone chain. Default true." },
-      },
-    },
+      "Get ALL mega-projects with deadline slippage, cost overrun, and full milestone history. Returns every project (there are only a few), so call this for any infrastructure or project question and pick the relevant one from the result. Do not assume a project is absent without calling this first.",
+    input_schema: { type: "object", properties: {} },
   },
 ];
 
@@ -58,7 +52,9 @@ async function searchPromises(a = {}) {
   let q = db.from("promises_full").select("*").limit(60);
   if (a.status) q = q.eq("status", a.status);
   if (a.category) q = q.ilike("category", `%${a.category}%`);
-  if (a.politician) q = q.ilike("politician", `%${a.politician}%`);
+  // Every word must appear, in any order: "KP Oli" matches "KP Sharma Oli".
+  if (a.politician)
+    for (const w of a.politician.trim().split(/\s+/)) q = q.ilike("politician", `%${w}%`);
   if (a.party) q = q.or(`party.ilike.%${a.party}%,party_abbr.ilike.%${a.party}%`);
   if (a.province) q = q.ilike("province", `%${a.province}%`);
   if (a.query) q = q.ilike("promise", `%${a.query}%`);
@@ -106,11 +102,9 @@ async function getStats() {
 }
 
 async function getProjects(a = {}) {
-  let q = db.from("mega_projects").select("*");
-  if (a.name) q = q.ilike("name", `%${a.name}%`);
-  const { data: projects, error } = await q;
+  const { data: projects, error } = await db.from("mega_projects").select("*");
   if (error) throw new Error(error.message);
-  if (a.include_milestones === false || !projects.length) return projects;
+  if (!projects.length) return projects;
 
   const { data: ms } = await db
     .from("project_milestones")
@@ -145,6 +139,15 @@ A promise is never marked broken on weak evidence.
 HONESTY ABOUT COVERAGE — do not skip this:
 The database is small and hand-curated. It is NOT a complete record of Nepali politics. So when a user asks a superlative question ("which party broke the MOST promises?"), answer in terms of what is RECORDED, and say so plainly: "Of the promises recorded here, X has the most broken — but this reflects what has been logged, not a full audit." Never let a count be mistaken for a verdict on a party.
 
+CURRENT DATABASE SNAPSHOT (already loaded — do NOT call get_stats to re-fetch this):
+{{STATS}}
+
+Use the snapshot above for any counting or comparison question. Only call search_promises or get_projects when you need the actual TEXT of promises or the detail of a project.
+
+If a search comes back empty, do NOT conclude the record is absent. Retry with a broader or shorter term first (a surname instead of a full name, no category filter). Only say something is missing after a broad search also finds nothing.
+
+NEVER narrate what you are about to do. Do not write "let me check", "I will look that up", or a preliminary guess before calling a tool. Call the tool silently, THEN write your answer. Your first written words should be the answer itself.
+
 TONE: neutral, factual, dry. You are a record, not a commentator. No editorialising about parties or politicians. If a user asks you to rate, insult, or endorse anyone, decline and give them the data instead.
 
 FORMAT: this renders in a narrow chat panel. Plain prose and simple hyphen lists only. NO markdown tables, NO headers, NO horizontal rules, NO emoji, NO bold-heavy formatting. Keep it under 120 words unless the question genuinely needs more. Work the coverage caveat into a sentence — do not append it as a warning block.
@@ -154,25 +157,42 @@ Answer in {{LANG}}.`;
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Content-Type", "application/json; charset=utf-8");
-  res.setHeader("Cache-Control", "no-store");
 
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return res.status(405).json({ error: "POST only." });
   if (!db) return res.status(500).json({ error: "Server is missing Supabase credentials." });
-  if (!process.env.ANTHROPIC_API_KEY) return res.status(500).json({ error: "Server is missing ANTHROPIC_API_KEY." });
+  if (!process.env.ANTHROPIC_API_KEY)
+    return res.status(500).json({ error: "Server is missing ANTHROPIC_API_KEY." });
 
   const { question, lang } = req.body || {};
   if (!question || typeof question !== "string" || !question.trim())
     return res.status(400).json({ error: "A question is required." });
   if (question.length > 500) return res.status(400).json({ error: "Question is too long (500 char max)." });
 
-  const system = SYSTEM.replace("{{LANG}}", lang === "ne" ? "Nepali (नेपाली)" : "English");
+  // Server-Sent Events. The tool loop runs here, invisibly; the moment the
+  // model starts writing prose we forward it token by token. Total time is
+  // unchanged — but the user sees words at ~1s instead of a blank box at 11s.
+  res.setHeader("Content-Type", "text/event-stream; charset=utf-8");
+  res.setHeader("Cache-Control", "no-store, no-transform");
+  res.setHeader("Connection", "keep-alive");
+
+  const emit = (event, data) => res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+
+  let snapshot;
+  try {
+    snapshot = JSON.stringify(await getStats());
+  } catch (err) {
+    console.error("stats prefetch failed:", err.message);
+    snapshot = "(unavailable — call get_stats)";
+  }
+
+  const system = SYSTEM
+    .replace("{{LANG}}", lang === "ne" ? "Nepali (नेपाली)" : "English")
+    .replace("{{STATS}}", snapshot);
+
   const messages = [{ role: "user", content: question.trim() }];
-  const toolsUsed = [];
 
   try {
-    // Agentic loop. Capped: the model gets a few rounds of retrieval, not infinite.
     for (let turn = 0; turn < 5; turn++) {
       const r = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
@@ -181,27 +201,95 @@ export default async function handler(req, res) {
           "x-api-key": process.env.ANTHROPIC_API_KEY,
           "anthropic-version": "2023-06-01",
         },
-        body: JSON.stringify({ model: MODEL, max_tokens: 1500, system, tools: TOOLS, messages }),
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: 1500,
+          system,
+          tools: TOOLS,
+          messages,
+          stream: true,
+        }),
       });
 
       if (!r.ok) {
-        const t = await r.text();
-        console.error("Anthropic API error:", r.status, t);
-        return res.status(502).json({ error: "The assistant is unavailable right now." });
+        console.error("Anthropic API error:", r.status, await r.text());
+        emit("error", { message: "The assistant is unavailable right now." });
+        return res.end();
       }
 
-      const data = await r.json();
-      messages.push({ role: "assistant", content: data.content });
+      // Reassemble the streamed blocks. Text deltas go straight to the client;
+      // tool_use blocks are buffered until complete, then executed.
+      const blocks = [];
+      let stopReason = null;
+      let buf = "";
+      let sawTool = false;
 
-      if (data.stop_reason !== "tool_use") {
-        const answer = data.content.filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
-        return res.status(200).json({ answer, tools_used: toolsUsed });
+      const reader = r.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+
+        const lines = buf.split("\n");
+        buf = lines.pop();
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          let ev;
+          try {
+            ev = JSON.parse(line.slice(6));
+          } catch {
+            continue;
+          }
+
+          if (ev.type === "content_block_start") {
+            const b = ev.content_block;
+            blocks[ev.index] =
+              b.type === "tool_use"
+                ? { type: "tool_use", id: b.id, name: b.name, input: "" }
+                : { type: "text", text: "" };
+            if (b.type === "tool_use") {
+              sawTool = true;
+              emit("reset", { reason: b.name }); // wipe any text streamed this turn
+            }
+          }
+
+          if (ev.type === "content_block_delta") {
+            const b = blocks[ev.index];
+            if (!b) continue;
+            if (ev.delta.type === "text_delta") {
+              b.text += ev.delta.text;
+              emit("token", { text: ev.delta.text });
+            }
+            if (ev.delta.type === "input_json_delta") {
+              b.input += ev.delta.partial_json;
+            }
+          }
+
+          if (ev.type === "message_delta" && ev.delta?.stop_reason) {
+            stopReason = ev.delta.stop_reason;
+          }
+        }
       }
 
-      const calls = data.content.filter((b) => b.type === "tool_use");
+      // Tool inputs arrive as a JSON string built from deltas — parse now.
+      const content = blocks.filter(Boolean).map((b) =>
+        b.type === "tool_use"
+          ? { type: "tool_use", id: b.id, name: b.name, input: b.input ? JSON.parse(b.input) : {} }
+          : { type: "text", text: b.text }
+      );
+
+      messages.push({ role: "assistant", content });
+
+      if (stopReason !== "tool_use") {
+        emit("done", {});
+        return res.end();
+      }
+
       const results = [];
-      for (const c of calls) {
-        toolsUsed.push(c.name);
+      for (const c of content.filter((b) => b.type === "tool_use")) {
         try {
           const out = await runTool(c.name, c.input);
           results.push({ type: "tool_result", tool_use_id: c.id, content: JSON.stringify(out) });
@@ -218,12 +306,11 @@ export default async function handler(req, res) {
       messages.push({ role: "user", content: results });
     }
 
-    return res.status(200).json({
-      answer: "I couldn't work that out from the database. Try asking something more specific.",
-      tools_used: toolsUsed,
-    });
+    emit("error", { message: "I couldn't work that out. Try asking something more specific." });
+    res.end();
   } catch (err) {
     console.error("ask.js failed:", err);
-    return res.status(500).json({ error: "Something went wrong." });
+    emit("error", { message: "Something went wrong." });
+    res.end();
   }
 }

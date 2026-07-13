@@ -26,19 +26,67 @@ export default function AskModal({ open, onClose }) {
     if (!q || busy) return;
     setInput("");
     setError(null);
-    setTurns((prev) => [...prev, { role: "user", text: q }]);
+    setTurns((prev) => [...prev, { role: "user", text: q }, { role: "ai", text: "" }]);
     setBusy(true);
+
     try {
       const r = await fetch("/api/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: q, lang }),
       });
-      const data = await r.json();
-      if (!r.ok) throw new Error(data.error || "Request failed");
-      setTurns((prev) => [...prev, { role: "ai", text: data.answer }]);
+
+      if (!r.ok || !r.body) {
+        const msg = await r.json().catch(() => ({}));
+        throw new Error(msg.error || "Request failed");
+      }
+
+      const reader = r.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = "";
+      let event = null;
+
+      // Append each token to the last turn as it arrives. On `reset` the
+      // model turned out to be calling a tool, so whatever it wrote first
+      // was a guess made before checking the data — wipe it.
+      const patchLast = (fn) =>
+        setTurns((prev) => {
+          const next = [...prev];
+          const last = next[next.length - 1];
+          next[next.length - 1] = { ...last, text: fn(last.text) };
+          return next;
+        });
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+
+        const lines = buf.split("\n");
+        buf = lines.pop();
+
+        for (const line of lines) {
+          if (line.startsWith("event: ")) {
+            event = line.slice(7).trim();
+            continue;
+          }
+          if (!line.startsWith("data: ")) continue;
+
+          let payload;
+          try {
+            payload = JSON.parse(line.slice(6));
+          } catch {
+            continue;
+          }
+
+          if (event === "token") patchLast((t) => t + payload.text);
+          if (event === "reset") patchLast(() => "");
+          if (event === "error") throw new Error(payload.message);
+        }
+      }
     } catch (err) {
       setError(err.message);
+      setTurns((prev) => prev.filter((t, i) => !(i === prev.length - 1 && t.role === "ai" && !t.text)));
     } finally {
       setBusy(false);
     }
@@ -72,7 +120,7 @@ export default function AskModal({ open, onClose }) {
             </div>
           ))}
 
-          {busy && (
+          {busy && !turns[turns.length - 1]?.text && (
             <div className="ask-turn ask-ai ask-busy">
               <p>{t("askThinking")}</p>
             </div>
