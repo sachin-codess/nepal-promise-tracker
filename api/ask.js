@@ -31,6 +31,10 @@ const TOOLS = [
         party: { type: "string", description: "Party name or abbreviation, e.g. NC, CPN-UML, RSP." },
         province: { type: "string", description: "Province name, or 'Federal' for national promises." },
         query: { type: "string", description: "Free-text keyword to match inside the promise text." },
+        election_cycle: {
+          type: "string",
+          description: "Which election's manifesto a promise came from, e.g. '2022 General Election' or '2026 General Election'. Use this to compare manifestos across cycles, or to find promises a party repeated after failing them. Omit for promises made outside an election (ministerial announcements, mayoral pledges, government commitment papers).",
+        },
       },
     },
   },
@@ -58,6 +62,7 @@ async function searchPromises(a = {}) {
   if (a.party) q = q.or(`party.ilike.%${a.party}%,party_abbr.ilike.%${a.party}%`);
   if (a.province) q = q.ilike("province", `%${a.province}%`);
   if (a.query) q = q.ilike("promise", `%${a.query}%`);
+  if (a.election_cycle) q = q.ilike("election_cycle", `%${a.election_cycle}%`);
   const { data, error } = await q;
   if (error) throw new Error(error.message);
   return data;
@@ -65,7 +70,7 @@ async function searchPromises(a = {}) {
 
 async function getStats() {
   const [{ data: promises, error: e1 }, { data: projects, error: e2 }] = await Promise.all([
-    db.from("promises_full").select("id,status,category,party,party_abbr,politician"),
+    db.from("promises_full").select("id,status,category,party,party_abbr,politician,election_cycle"),
     db.from("mega_projects").select("id,name,status,original_deadline,current_deadline,budget_original,budget_allocated"),
   ]);
   if (e1) throw new Error(e1.message);
@@ -94,6 +99,7 @@ async function getStats() {
     by_party: tally(promises, "party"),
     by_category: tally(promises, "category"),
     by_politician: tally(promises, "politician"),
+    by_election_cycle: tally(promises, "election_cycle"),
     total_projects: projects.length,
     total_years_slipped: Math.round(slipped * 10) / 10,
     total_cost_overrun_npr: overrun,
@@ -129,6 +135,8 @@ GROUNDING — this is the rule that matters most:
 - If the tools return nothing relevant, say the database does not have it. Suggest the user submit it via the "Submit a promise" button. Do not fill the gap from memory.
 - Cite promise IDs inline like [#12] and name projects explicitly. Every factual claim must trace to a row.
 - Never invent numbers. If a figure is null, say it is not recorded.
+
+ELECTION CYCLES — promises are immutable historical records. A promise stays tied to the election that produced it; only its status changes over time. This means you CAN compare manifestos across cycles: which promises a party repeated, which it dropped, and whether it failed a target and then promised a bigger one. If asked to compare manifestos, filter search_promises by election_cycle and party, and say so plainly.
 
 METHODOLOGY — explain this when a status is questioned:
 - KEPT = officially fulfilled, with proof.
