@@ -22,7 +22,7 @@ export default async function handler(req, res) {
   if (province) q = q.eq("province", province);
   // Name filters are forgiving — partial, case-insensitive.
   if (politician) q = q.ilike("politician", `%${politician}%`);
-  if (party) q = q.ilike("party", `%${party}%`);
+  if (party) q = q.or(`party.ilike.%${party}%,party_abbr.ilike.%${party}%`);
 
   const { data, error, count } = await q;
   if (error) return fail(res, 500, error.message);
