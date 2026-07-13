@@ -13,6 +13,7 @@ import MapModal from "./components/MapModal";
 import BudgetModal from "./components/BudgetModal";
 import ProjectsModal from "./components/ProjectsModal";
 import SubmitModal from "./components/SubmitModal";
+import AskModal from "./components/AskModal";
 
 export default function App() {
   const [promises, setPromises] = useState([]);
@@ -29,6 +30,7 @@ export default function App() {
   const [showBudget, setShowBudget] = useState(false);
   const [showProjects, setShowProjects] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
+  const [showAsk, setShowAsk] = useState(false);
   const [projects, setProjects] = useState([]);
   const [milestones, setMilestones] = useState([]);
   const [projLoading, setProjLoading] = useState(true);
@@ -128,6 +130,9 @@ export default function App() {
         <div className="header-actions">
           <button className="lang-btn" onClick={() => setLang(lang === "en" ? "ne" : "en")}>
             {lang === "en" ? "ने" : "EN"}
+          </button>
+          <button className="ask-btn" onClick={() => setShowAsk(true)}>
+            {t("askBtn")}
           </button>
           <button className="map-btn" onClick={() => setShowMap(true)}>
             {t("map")}
@@ -238,6 +243,7 @@ export default function App() {
         loading={projLoading}
       />
       <SubmitModal open={showSubmit} onClose={() => setShowSubmit(false)} />
+      <AskModal open={showAsk} onClose={() => setShowAsk(false)} />
     </div>
   );
 }

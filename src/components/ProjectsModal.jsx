@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useT, useLang, useCat, useNe, fmtDate } from "../lib/i18n";
+import { useT, useLang, useCat, useNe, useMoney, fmtDate } from "../lib/i18n";
 
 const EV_META = {
   start:      { color: "#1E3A5F", key: "projStart" },
@@ -17,12 +17,6 @@ const STATUS_KEY = {
   abandoned: "stAbandoned",
 };
 
-
-// Rs 213,000,000,000 -> "Rs 213 Arba". Matches the convention used elsewhere.
-function fmtNpr(n) {
-  if (n == null) return "\u2014";
-  return "Rs " + Math.round(n / 1e9) + " Arba";
-}
 
 // Whole years between two dates. This is the accountability number.
 function yearsBetween(a, b) {
@@ -45,6 +39,7 @@ export default function ProjectsModal({ open, onClose, projects, milestones, loa
   const cat = useCat();
   const { lang } = useLang();
   const ne = useNe();
+  const fmtNpr = useMoney();
   const [openId, setOpenId] = useState(null);
 
   useEffect(() => {

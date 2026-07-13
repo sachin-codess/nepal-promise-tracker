@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { fetchBudget, fetchBudgetYears } from "../lib/supabase";
-import { useT } from "../lib/i18n";
+import { useT, useMoney } from "../lib/i18n";
 
 const NPR_PER_USD = 152;
 function fmtUSD(nprAmount) {
@@ -9,12 +9,6 @@ function fmtUSD(nprAmount) {
   if (usd >= 1e6) return `$${(usd / 1e6).toFixed(0)}M`;
   return `$${Math.round(usd).toLocaleString()}`;
 }
-function fmtNPR(amount) {
-  if (amount >= 1e9) return `Rs ${(amount / 1e9).toFixed(1)} Arba`;
-  if (amount >= 1e7) return `Rs ${(amount / 1e7).toFixed(1)} Crore`;
-  return `Rs ${amount.toLocaleString()}`;
-}
-
 // Full federal budget totals per year (for the note), so it stays year-accurate.
 const FULL_BUDGET = {
   "2026/27": "~Rs 2.12 trillion",
@@ -33,6 +27,7 @@ const NATIONAL_TOTAL = {
 
 export default function BudgetModal({ open, onClose }) {
   const t = useT();
+  const fmtNPR = useMoney();
   const [years, setYears] = useState([]);   // [{ad, bs}]
   const [year, setYear] = useState(null);   // AD string
   const [rows, setRows] = useState([]);

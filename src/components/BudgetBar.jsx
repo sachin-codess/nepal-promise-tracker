@@ -1,23 +1,8 @@
-import { useT } from "../lib/i18n";
-
-// Format a raw number into a readable budget string.
-// NPR uses Arba (1 Arba = 1,000,000,000) and Crore (10,000,000), how Nepalis read large sums.
-// USD uses B (billion) and M (million).
-function fmtMoney(amount, currency) {
-  if (amount == null) return null;
-  if (currency === "USD") {
-    if (amount >= 1e9) return `$${(amount / 1e9).toFixed(amount % 1e9 === 0 ? 0 : 1)}B`;
-    if (amount >= 1e6) return `$${(amount / 1e6).toFixed(amount % 1e6 === 0 ? 0 : 1)}M`;
-    return `$${amount.toLocaleString()}`;
-  }
-  // Default NPR
-  if (amount >= 1e9) return `Rs ${(amount / 1e9).toFixed(amount % 1e9 === 0 ? 0 : 1)} Arba`;
-  if (amount >= 1e7) return `Rs ${(amount / 1e7).toFixed(1)} Crore`;
-  return `Rs ${amount.toLocaleString()}`;
-}
+import { useT, useMoney } from "../lib/i18n";
 
 export default function BudgetBar({ p }) {
   const t = useT();
+  const fmtMoney = useMoney();
   const allocated = p.budget_allocated;
   const spent = p.budget_spent;
   const currency = p.budget_currency || "NPR";

@@ -28,6 +28,17 @@ export const STRINGS = {
     showingProvince: "Showing promises for",
     province: "province",
     autoTranslated: "Auto-translated — may contain errors.",
+    askBtn: "Ask",
+    askTitle: "Ask the database",
+    askSub: "Ask about any promise, politician, party, or project. Every answer comes from recorded data.",
+    askPlaceholder: "Ask a question…",
+    askSend: "Ask",
+    askThinking: "Checking the records…",
+    askDisclaimer: "Answers are generated from this database only. Always check the cited sources yourself.",
+    askS1: "Which party has the most broken promises?",
+    askS2: "What happened to Pokhara Airport?",
+    askS3: "Show all promises about education.",
+    askS4: "Compare UML and Nepali Congress.",
     budget: "Budget (spent / allocated):",
     budgetSource: "Budget source →",
     budgetBtn: "Budget",
@@ -155,6 +166,17 @@ export const STRINGS = {
     showingProvince: "यस प्रदेशका वाचाहरू:",
     province: "प्रदेश",
     autoTranslated: "स्वतः अनुवादित — त्रुटि हुन सक्छ।",
+    askBtn: "सोध्नुहोस्",
+    askTitle: "डाटाबेसलाई सोध्नुहोस्",
+    askSub: "कुनै पनि प्रतिज्ञा, नेता, पार्टी वा आयोजनाबारे सोध्नुहोस्। हरेक उत्तर अभिलेखित तथ्यांकबाट आउँछ।",
+    askPlaceholder: "प्रश्न सोध्नुहोस्…",
+    askSend: "सोध्नुहोस्",
+    askThinking: "अभिलेख हेर्दै…",
+    askDisclaimer: "उत्तरहरू यही डाटाबेसबाट मात्र बनेका हुन्। उद्धृत स्रोतहरू आफैं जाँच्नुहोस्।",
+    askS1: "कुन पार्टीले सबैभन्दा धेरै प्रतिज्ञा तोड्यो?",
+    askS2: "पोखरा विमानस्थलको के भयो?",
+    askS3: "शिक्षासम्बन्धी सबै प्रतिज्ञा देखाउनुहोस्।",
+    askS4: "एमाले र नेपाली कांग्रेस तुलना गर्नुहोस्।",
     budget: "बजेट (खर्च / विनियोजित):",
     budgetSource: "बजेट स्रोत →",
     budgetBtn: "बजेट",
@@ -339,6 +361,41 @@ export function fmtDate(d, lang) {
 // Nepali AND a translation exists; otherwise the English original. Untranslated
 // rows keep showing English rather than a blank — so translation can be
 // incremental and a missing row is never a broken row.
+// Money formatting, single source of truth. NPR reads in Arba (1e9) and Crore
+// (1e7), how Nepalis read large sums; USD in B/M. In Nepali the numerals go
+// Devanagari and the unit words go Nepali, so the whole string is one script —
+// otherwise a NE page shows "Rs 22 Arba" next to a Devanagari date.
+const DEV = "\u0966\u0967\u0968\u0969\u096a\u096b\u096c\u096d\u096e\u096f";
+function toDev(str) {
+  return String(str).replace(/[0-9]/g, (d) => DEV[+d]);
+}
+
+export function fmtMoney(amount, currency, lang) {
+  if (amount == null) return "\u2014";
+  const ne = lang === "ne";
+  const dec = (v, unit) => v.toFixed(amount % unit === 0 ? 0 : 1);
+
+  if (currency === "USD") {
+    if (amount >= 1e9) return `$${dec(amount / 1e9, 1e9)}B`;
+    if (amount >= 1e6) return `$${dec(amount / 1e6, 1e6)}M`;
+    return `$${amount.toLocaleString()}`;
+  }
+
+  let n, unit;
+  if (amount >= 1e9)      { n = dec(amount / 1e9, 1e9); unit = ne ? "\u0905\u0930\u094d\u092c" : "Arba"; }
+  else if (amount >= 1e7) { n = (amount / 1e7).toFixed(1); unit = ne ? "\u0915\u0930\u094b\u0921" : "Crore"; }
+  else                    { n = amount.toLocaleString(ne ? "ne-NP" : "en-GB"); unit = ""; }
+
+  const rs = ne ? "\u0930\u0941" : "Rs";
+  const num = ne ? toDev(n) : n;
+  return unit ? `${rs} ${num} ${unit}` : `${rs} ${num}`;
+}
+
+export function useMoney() {
+  const { lang } = useLang();
+  return (amount, currency) => fmtMoney(amount, currency, lang);
+}
+
 export function useNe() {
   const { lang } = useLang();
   return (row, field) => {

@@ -805,3 +805,123 @@ body {
 @media (max-width: 640px) {
   .sub-grid { grid-template-columns: 1fr; }
 }
+
+/* ── AI assistant (AskModal) ───────────────────────────────── */
+
+/* The headline feature — gets a filled button, not an outline like the rest. */
+.ask-btn {
+  background: #1a1a1a;
+  color: #fff;
+  border: 1px solid #1a1a1a;
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.ask-btn:hover { opacity: 0.82; }
+
+.ask-modal {
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  max-height: 82vh;
+}
+
+.ask-sub {
+  color: #666;
+  font-size: 0.88rem;
+  margin: -0.4rem 0 1rem;
+  line-height: 1.45;
+}
+
+.ask-log {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 180px;
+  padding-right: 4px;
+  margin-bottom: 0.9rem;
+}
+
+.ask-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+}
+.ask-chip {
+  background: #f4f4f2;
+  border: 1px solid #e2e2de;
+  border-radius: 999px;
+  padding: 0.42rem 0.8rem;
+  font-size: 0.8rem;
+  color: #333;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+.ask-chip:hover { background: #ebebe7; }
+
+.ask-turn {
+  margin-bottom: 0.9rem;
+  line-height: 1.55;
+  font-size: 0.9rem;
+}
+.ask-turn p { margin: 0 0 0.55rem; }
+.ask-turn p:last-child { margin-bottom: 0; }
+
+.ask-user {
+  background: #f4f4f2;
+  border-radius: 10px;
+  padding: 0.6rem 0.85rem;
+  margin-left: 15%;
+  font-weight: 500;
+}
+
+.ask-ai {
+  border-left: 3px solid #1a1a1a;
+  padding-left: 0.85rem;
+}
+
+.ask-busy { color: #999; font-style: italic; }
+
+.ask-error {
+  background: #fdf0f0;
+  border: 1px solid #f3d4d4;
+  color: #a33;
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+.ask-input-row { display: flex; gap: 0.5rem; }
+.ask-input-row input {
+  flex: 1;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+.ask-input-row input:focus { outline: none; border-color: #1a1a1a; }
+.ask-input-row input:disabled { background: #fafafa; }
+
+.ask-send {
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.15rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ask-send:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.ask-disclaimer {
+  font-size: 0.74rem;
+  color: #999;
+  margin: 0.7rem 0 0;
+  line-height: 1.4;
+}
