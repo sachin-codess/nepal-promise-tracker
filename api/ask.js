@@ -47,6 +47,21 @@ const TOOLS = [
     },
   },
   {
+    name: "compare_parties",
+    description:
+      "Break down promises by party AND status in a single call, with promise ids for citation. Use this for any party-vs-party comparison ('who kept more?', 'compare NC and UML') instead of running one search per party. Returns, per party: a total plus the id, politician, and short text of every kept, broken, and in_progress promise. Pass `parties` to narrow, or omit it to get all parties.",
+    input_schema: {
+      type: "object",
+      properties: {
+        parties: {
+          type: "array",
+          items: { type: "string" },
+          description: 'Party names or abbreviations to include, e.g. ["NC", "CPN-UML"]. Omit for all parties.',
+        },
+      },
+    },
+  },
+  {
     name: "get_stats",
     description:
       "Get aggregate counts across the whole database: promises by status, by party, by category, plus mega-project totals (years slipped, cost overrun). Use this for 'how many', 'which party has the most', 'compare X and Y' questions.",
@@ -77,6 +92,41 @@ async function searchPromises(a = {}) {
   return data;
 }
 
+async function compareParties(a = {}) {
+  const { data, error } = await db
+    .from("promises_full")
+    .select("id,promise,politician,party,party_abbr,status");
+  if (error) throw new Error(error.message);
+
+  const wanted = (Array.isArray(a.parties) ? a.parties : []).map((p) => String(p).toLowerCase());
+  const match = (r) =>
+    !wanted.length ||
+    wanted.some(
+      (w) =>
+        (r.party || "").toLowerCase().includes(w) || (r.party_abbr || "").toLowerCase().includes(w)
+    );
+
+  // The ilike lesson, applied here from day one: at this scale a filter that
+  // can silently return zero rows is worse than no filter. If the requested
+  // parties match nothing, return ALL parties and let the model pick.
+  let rows = data.filter(match);
+  if (wanted.length && !rows.length) rows = data;
+
+  const out = {};
+  for (const r of rows) {
+    const key = r.party || "(no party affiliation)";
+    out[key] ||= { total: 0 };
+    out[key].total++;
+    const bucket = r.status || "unknown";
+    (out[key][bucket] ||= []).push({
+      id: r.id,
+      politician: r.politician,
+      promise: (r.promise || "").slice(0, 100),
+    });
+  }
+  return out;
+}
+
 async function getStats() {
   const [{ data: promises, error: e1 }, { data: projects, error: e2 }] = await Promise.all([
     db.from("promises_full").select("id,status,category,party,party_abbr,politician,election_cycle,deadline_status"),
@@ -102,10 +152,21 @@ async function getStats() {
     }
   }
 
+  // status x party cross-tab: lets the snapshot answer "who broke/kept the
+  // most?" with zero tool calls instead of one search per status.
+  const partyStatus = {};
+  for (const p of promises) {
+    const party = p.party ?? "(no party affiliation)";
+    const status = p.status ?? "unknown";
+    partyStatus[party] ||= {};
+    partyStatus[party][status] = (partyStatus[party][status] || 0) + 1;
+  }
+
   return {
     total_promises: promises.length,
     by_status: tally(promises, "status"),
     by_party: tally(promises, "party"),
+    by_party_status: partyStatus,
     by_category: tally(promises, "category"),
     by_politician: tally(promises, "politician"),
     by_election_cycle: tally(promises, "election_cycle"),
@@ -135,6 +196,7 @@ async function runTool(name, input) {
   if (name === "search_promises") return searchPromises(input);
   if (name === "get_stats") return getStats();
   if (name === "get_projects") return getProjects(input);
+  if (name === "compare_parties") return compareParties(input);
   throw new Error(`Unknown tool: ${name}`);
 }
 
@@ -162,7 +224,7 @@ The database is small and hand-curated. It is NOT a complete record of Nepali po
 CURRENT DATABASE SNAPSHOT (already loaded — do NOT call get_stats to re-fetch this):
 {{STATS}}
 
-Use the snapshot above for any counting or comparison question. Only call search_promises or get_projects when you need the actual TEXT of promises or the detail of a project.
+Use the snapshot above for any counting or comparison question — its by_party_status cross-tab answers "who kept/broke the most?" with no tool call at all. When a comparison needs promise IDs for citation, call compare_parties ONCE instead of running one search per party. Only call search_promises or get_projects when you need the actual TEXT of promises or the detail of a project.
 
 If a search returns ZERO rows, do NOT conclude the record is absent — retry once with a broader or shorter term (a surname instead of a full name, or no category filter). But if a search returns even ONE row, trust it: report what you found and do not search again to double-check. A small result set means the dataset is thin, not that the query failed.
 
