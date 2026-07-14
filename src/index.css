@@ -972,3 +972,8 @@ body {
   font-size: 0.85rem;
   cursor: pointer;
 }
+
+/* follow-up chips sit under the finished answer, slightly tighter */
+.ask-followups {
+  margin-top: 4px;
+}

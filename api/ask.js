@@ -200,6 +200,59 @@ async function runTool(name, input) {
   throw new Error(`Unknown tool: ${name}`);
 }
 
+// After the answer has fully streamed, suggest 3 follow-up questions via one
+// small, fast Haiku call (the grounded-hedging behaviour we keep Sonnet for
+// doesn't matter here — these are just question ideas, not answers). Strictly
+// best-effort: any failure means no chips, never a broken answer. The user is
+// already reading the finished answer while this runs, so it costs no
+// perceived latency.
+async function emitChips(messages, lang, emit) {
+  try {
+    // Plain-text transcript only — tool blocks are internal plumbing.
+    const transcript = messages
+      .map((m) => {
+        const text =
+          typeof m.content === "string"
+            ? m.content
+            : m.content
+                .filter((b) => b.type === "text")
+                .map((b) => b.text)
+                .join("\n");
+        return text ? `${m.role.toUpperCase()}: ${text}` : null;
+      })
+      .filter(Boolean)
+      .join("\n\n")
+      .slice(-4000);
+
+    const r = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": process.env.ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: "claude-haiku-4-5",
+        max_tokens: 300,
+        system: `You suggest follow-up questions for a chat assistant that answers ONLY from a database of recorded Nepali political promises, parties, politicians, and mega-projects (statuses: kept / broken / in_progress; things like deadlines, budgets, election manifestos, cost overruns). Given a conversation, suggest exactly 3 short, natural follow-up questions the user might ask NEXT — questions this database could plausibly answer. Stay close to the topics already discussed. Under 10 words each. Write them in ${lang === "ne" ? "Nepali (नेपाली)" : "English"}. Respond ONLY with a JSON array of 3 strings — no prose, no markdown fences.`,
+        messages: [{ role: "user", content: transcript }],
+      }),
+    });
+    if (!r.ok) throw new Error(`chips call: ${r.status}`);
+
+    const data = await r.json();
+    const text = (data.content || [])
+      .filter((b) => b.type === "text")
+      .map((b) => b.text)
+      .join("");
+    const chips = JSON.parse(text.replace(/```json|```/g, "").trim());
+    if (Array.isArray(chips) && chips.length)
+      emit("chips", { chips: chips.filter((c) => typeof c === "string").slice(0, 3) });
+  } catch (err) {
+    console.error("chips failed (non-fatal):", err.message);
+  }
+}
+
 const SYSTEM = `You are the assistant for वाचा (Nepal Promise Tracker), an independent, non-partisan platform that records promises made by Nepali politicians and tracks whether they were kept.
 
 GROUNDING — this is the rule that matters most:
@@ -404,6 +457,7 @@ export default async function handler(req, res) {
       messages.push({ role: "assistant", content });
 
       if (stopReason !== "tool_use") {
+        await emitChips(messages, lang, emit);
         emit("done", {});
         return res.end();
       }

@@ -14,6 +14,7 @@ export default function AskModal({ open, onClose, promises = [] }) {
   const [stage, setStage] = useState(null); // which tool is running, for the status line
   const [error, setError] = useState(null);
   const [cited, setCited] = useState(null); // promise object behind a tapped [#id] citation
+  const [chips, setChips] = useState([]); // model-suggested follow-up questions
   const endRef = useRef(null);
 
   useEffect(() => {
@@ -46,6 +47,7 @@ export default function AskModal({ open, onClose, promises = [] }) {
     if (!q || busy) return;
     setInput("");
     setError(null);
+    setChips([]);
 
     // The whole visible conversation, oldest first, ending with the new
     // question. Only settled text ever lives in `turns`, so no held or
@@ -126,6 +128,9 @@ export default function AskModal({ open, onClose, promises = [] }) {
             const key = payload.name || payload.reason;
             if (key) setStage(key);
           }
+          if (event === "chips" && Array.isArray(payload.chips)) {
+            setChips(payload.chips);
+          }
           if (event === "done" && !settled) {
             // No tool was called: the held text WAS the answer. Paint it.
             patchLast(() => flush.join(""));
@@ -183,6 +188,15 @@ export default function AskModal({ open, onClose, promises = [] }) {
                   ? t("askStageCompare")
                   : t("askThinking")}
               </p>
+            </div>
+          )}
+          {!busy && chips.length > 0 && (
+            <div className="ask-suggestions ask-followups">
+              {chips.map((c) => (
+                <button key={c} className="ask-chip" onClick={() => send(c)}>
+                  {c}
+                </button>
+              ))}
             </div>
           )}
           {error && <div className="ask-error">{error}</div>}
