@@ -27,6 +27,18 @@ export default function AskModal({ open, onClose }) {
     if (!q || busy) return;
     setInput("");
     setError(null);
+
+    // The whole visible conversation, oldest first, ending with the new
+    // question. Only settled text ever lives in `turns`, so no held or
+    // streaming fragments can leak into history. The API expects the role
+    // name 'assistant', so map our internal 'ai' before sending.
+    const history = [
+      ...turns
+        .filter((turn) => turn.text)
+        .map((turn) => ({ role: turn.role === "ai" ? "assistant" : "user", content: turn.text })),
+      { role: "user", content: q },
+    ];
+
     setTurns((prev) => [...prev, { role: "user", text: q }, { role: "ai", text: "" }]);
     setBusy(true);
     setStage(null);
@@ -35,7 +47,7 @@ export default function AskModal({ open, onClose }) {
       const r = await fetch("/api/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: q, lang }),
+        body: JSON.stringify({ messages: history, lang }),
       });
 
       if (!r.ok || !r.body) {
