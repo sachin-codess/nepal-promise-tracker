@@ -243,7 +243,7 @@ export default function App() {
         loading={projLoading}
       />
       <SubmitModal open={showSubmit} onClose={() => setShowSubmit(false)} />
-      <AskModal open={showAsk} onClose={() => setShowAsk(false)} />
+      <AskModal open={showAsk} onClose={() => setShowAsk(false)} promises={promises} />
     </div>
   );
 }

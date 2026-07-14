@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { useT, useLang } from "../lib/i18n";
+import PromiseCard from "./PromiseCard";
 
 // Chat panel over the promise DB. Talks to /api/ask, which runs the
 // tool-calling loop server-side — the API key never reaches the browser.
 
-export default function AskModal({ open, onClose }) {
+export default function AskModal({ open, onClose, promises = [] }) {
   const t = useT();
   const { lang } = useLang();
   const [turns, setTurns] = useState([]); // { role: 'user'|'ai', text }
@@ -12,6 +13,7 @@ export default function AskModal({ open, onClose }) {
   const [busy, setBusy] = useState(false);
   const [stage, setStage] = useState(null); // which tool is running, for the status line
   const [error, setError] = useState(null);
+  const [cited, setCited] = useState(null); // promise object behind a tapped [#id] citation
   const endRef = useRef(null);
 
   useEffect(() => {
@@ -21,6 +23,23 @@ export default function AskModal({ open, onClose }) {
   if (!open) return null;
 
   const SUGGESTIONS = [t("askS1"), t("askS2"), t("askS3"), t("askS4")];
+
+  // Render answer text with [#12]-style citations as tappable buttons.
+  // A citation only becomes a button when the id exists in loaded data —
+  // an unknown id stays plain text rather than becoming a dead link.
+  function renderWithCitations(text) {
+    return text.split(/(\[#\d+\])/g).map((part, i) => {
+      const m = part.match(/^\[#(\d+)\]$/);
+      if (!m) return part;
+      const p = promises.find((x) => x.id === Number(m[1]));
+      if (!p) return part;
+      return (
+        <button key={i} className="ask-cite" onClick={() => setCited(p)}>
+          {part}
+        </button>
+      );
+    });
+  }
 
   async function send(question) {
     const q = (question ?? input).trim();
@@ -146,7 +165,7 @@ export default function AskModal({ open, onClose }) {
           {turns.map((turn, i) => (
             <div key={i} className={`ask-turn ask-${turn.role}`}>
               {turn.text.split("\n").filter(Boolean).map((para, j) => (
-                <p key={j}>{para}</p>
+                <p key={j}>{turn.role === "ai" ? renderWithCitations(para) : para}</p>
               ))}
             </div>
           ))}
@@ -160,6 +179,8 @@ export default function AskModal({ open, onClose }) {
                   ? t("askStageProjects")
                   : stage === "get_stats"
                   ? t("askStageStats")
+                  : stage === "compare_parties"
+                  ? t("askStageCompare")
                   : t("askThinking")}
               </p>
             </div>
@@ -167,6 +188,17 @@ export default function AskModal({ open, onClose }) {
           {error && <div className="ask-error">{error}</div>}
           <div ref={endRef} />
         </div>
+
+        {cited && (
+          <div className="ask-cite-panel" onClick={() => setCited(null)}>
+            <div className="ask-cite-inner" onClick={(e) => e.stopPropagation()}>
+              <button className="ask-cite-close" onClick={() => setCited(null)}>
+                {t("askCitedClose")} ×
+              </button>
+              <PromiseCard p={cited} />
+            </div>
+          </div>
+        )}
 
         <div className="ask-input-row">
           <input
