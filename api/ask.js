@@ -1,5 +1,8 @@
 // AI assistant over the promise database.
-// POST { question, lang } -> { answer, tools_used }
+// POST { messages, lang } -> SSE stream. `messages` is the visible chat so
+// far ([{ role, content }...], ending with the newest user question), which
+// gives the model conversation memory for follow-ups ("what about NC?").
+// Legacy { question, lang } is still accepted.
 //
 // NOT part of the public read-only API: this takes POST, and its answers
 // must never be edge-cached. It reuses the `db` client from _lib/db.js but
@@ -163,6 +166,8 @@ Use the snapshot above for any counting or comparison question. Only call search
 
 If a search returns ZERO rows, do NOT conclude the record is absent — retry once with a broader or shorter term (a surname instead of a full name, or no category filter). But if a search returns even ONE row, trust it: report what you found and do not search again to double-check. A small result set means the dataset is thin, not that the query failed.
 
+FOLLOW-UPS — earlier turns of this conversation may be included. Interpret short follow-up questions ("what about NC?", "and in 2022?") in the context of what was just discussed. But the GROUNDING rule still applies to every answer: re-derive facts from the snapshot or a fresh tool call — do not simply repeat numbers from your own earlier answers.
+
 NEVER narrate what you are about to do. Do not write "let me check", "I will look that up", or a preliminary guess before calling a tool. Call the tool silently, THEN write your answer. Your first written words should be the answer itself.
 
 TONE: neutral, factual, dry. You are a record, not a commentator. No editorialising about parties or politicians. If a user asks you to rate, insult, or endorse anyone, decline and give them the data instead.
@@ -181,10 +186,46 @@ export default async function handler(req, res) {
   if (!process.env.ANTHROPIC_API_KEY)
     return res.status(500).json({ error: "Server is missing ANTHROPIC_API_KEY." });
 
-  const { question, lang } = req.body || {};
-  if (!question || typeof question !== "string" || !question.trim())
-    return res.status(400).json({ error: "A question is required." });
-  if (question.length > 500) return res.status(400).json({ error: "Question is too long (500 char max)." });
+  const { question, messages: history, lang } = req.body || {};
+
+  // Accept the new shape { messages: [...] } or the legacy { question }.
+  // History gives the model memory for follow-ups; we only ever receive the
+  // SETTLED text of previous answers (never held/streaming fragments).
+  let turns;
+  if (Array.isArray(history) && history.length) {
+    turns = history
+      .filter(
+        (m) =>
+          m &&
+          (m.role === "user" || m.role === "assistant") &&
+          typeof m.content === "string" &&
+          m.content.trim()
+      )
+      // Users are capped at 500 chars (same as before); old answers at 2000.
+      .map((m) => ({ role: m.role, content: m.content.trim().slice(0, m.role === "user" ? 500 : 2000) }))
+      // Last 4 exchanges + the new question. Keeps tokens and latency flat —
+      // the ~7s we accepted must not creep upward as chats get long.
+      .slice(-9);
+
+    // The Anthropic API requires alternating roles starting with `user`:
+    // merge accidental same-role runs, drop a leading assistant turn.
+    const merged = [];
+    for (const t of turns) {
+      const last = merged[merged.length - 1];
+      if (last && last.role === t.role) last.content += "\n" + t.content;
+      else merged.push({ ...t });
+    }
+    while (merged.length && merged[0].role !== "user") merged.shift();
+    turns = merged;
+
+    if (!turns.length || turns[turns.length - 1].role !== "user")
+      return res.status(400).json({ error: "messages must end with a user question." });
+  } else {
+    if (!question || typeof question !== "string" || !question.trim())
+      return res.status(400).json({ error: "A question is required." });
+    if (question.length > 500) return res.status(400).json({ error: "Question is too long (500 char max)." });
+    turns = [{ role: "user", content: question.trim() }];
+  }
 
   // Server-Sent Events. The tool loop runs here, invisibly; the moment the
   // model starts writing prose we forward it token by token. Total time is
@@ -207,7 +248,7 @@ export default async function handler(req, res) {
     .replace("{{LANG}}", lang === "ne" ? "Nepali (नेपाली)" : "English")
     .replace("{{STATS}}", snapshot);
 
-  const messages = [{ role: "user", content: question.trim() }];
+  const messages = turns;
 
   try {
     for (let turn = 0; turn < 5; turn++) {
