@@ -8,6 +8,16 @@ import { partyLeaderboard, politicianLeaderboard } from "../lib/scoring";
 
 const CONF_LABEL = { high: "confHigh", medium: "confMedium", low: "confLow" };
 
+// Colour the score by how strong it is — but ONLY when the data is trustworthy.
+// A Provisional (thin-data) row stays neutral even with a high number, so bright
+// green never overstates a score built on two or three promises.
+function scoreClass(s) {
+  if (s.provisional) return "lb-score-neutral";
+  if (s.score >= 70) return "lb-score-strong";
+  if (s.score >= 45) return "lb-score-mid";
+  return "lb-score-weak";
+}
+
 // Party marker: a bold colour chip, with an optional logo overlaid on top.
 // The logo is looked up by abbreviation at /party-logos/{ABBR}.png. If no such
 // file exists (the default today), onError hides the img and the colour chip
@@ -42,7 +52,7 @@ function Row({ rank, name, sub, color, abbr, s, t }) {
       </div>
       <div className="lb-metrics">
         <div className="lb-score">
-          <span className="lb-score-num">{s.score}</span>
+          <span className={"lb-score-num " + scoreClass(s)}>{s.score}</span>
           <span className="lb-score-max">/100</span>
         </div>
         <div className="lb-secondary">
@@ -130,7 +140,7 @@ export default function LeaderboardModal({ open, promises, onClose }) {
                 rank={i + 1}
                 name={r.politician}
                 sub={[r.position, r.party].filter(Boolean).join(" · ")}
-                color={null}
+                color={r.color}
                 abbr={null}
                 s={r}
                 t={t}

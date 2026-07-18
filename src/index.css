@@ -1012,6 +1012,13 @@ body {
 .lb-metrics { flex: 0 0 auto; text-align: right; display: flex; flex-direction: column; gap: 2px; }
 .lb-score { line-height: 1; }
 .lb-score-num { font-size: 1.4rem; font-weight: 800; color: #1E3A5F; }
+/* Score colour by strength — applied ONLY to trustworthy (non-provisional)
+   rows via scoreClass() in the component, so a thin-data 73 never gets bright
+   green it hasn't earned. Provisional rows keep the neutral navy. */
+.lb-score-strong  { color: #1B7A3D; }   /* 70+   green */
+.lb-score-mid     { color: #C77D00; }   /* 45-69 amber */
+.lb-score-weak    { color: #B3261E; }   /* <45   red   */
+.lb-score-neutral { color: #1E3A5F; }   /* provisional */
 .lb-score-max { font-size: 0.75rem; color: #999; margin-left: 1px; }
 .lb-secondary { display: flex; flex-direction: column; }
 .lb-resolution { font-size: 0.72rem; color: #555; }

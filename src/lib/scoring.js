@@ -112,7 +112,7 @@ export function politicianLeaderboard(promises) {
   for (const r of promises) {
     if (!r.politician) continue;
     if (!groups.has(r.politician)) {
-      groups.set(r.politician, { politician: r.politician, party: r.party || "", position: r.position || "", rows: [] });
+      groups.set(r.politician, { politician: r.politician, party: r.party || "", position: r.position || "", color: r.party_color || "#5A6B8C", rows: [] });
     }
     groups.get(r.politician).rows.push(r);
   }
@@ -121,7 +121,7 @@ export function politicianLeaderboard(promises) {
   for (const g of groups.values()) {
     const s = scorePromises(g.rows);
     if (!s) continue;
-    board.push({ politician: g.politician, party: g.party, position: g.position, ...s });
+    board.push({ politician: g.politician, party: g.party, position: g.position, color: g.color, ...s });
   }
 
   board.sort((a, b) => b.score - a.score);
