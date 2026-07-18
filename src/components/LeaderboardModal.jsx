@@ -8,12 +8,34 @@ import { partyLeaderboard, politicianLeaderboard } from "../lib/scoring";
 
 const CONF_LABEL = { high: "confHigh", medium: "confMedium", low: "confLow" };
 
+// Party marker: a bold colour chip, with an optional logo overlaid on top.
+// The logo is looked up by abbreviation at /party-logos/{ABBR}.png. If no such
+// file exists (the default today), onError hides the img and the colour chip
+// shows through. Drop logo files in later and they light up automatically —
+// no DB change, no code change.
+function PartyMark({ color, abbr }) {
+  const [logoOk, setLogoOk] = useState(true);
+  const src = abbr ? `/party-logos/${abbr}.png` : null;
+  return (
+    <span className="lb-mark" style={{ background: color || "#1E3A5F" }}>
+      {src && logoOk && (
+        <img
+          className="lb-mark-logo"
+          src={src}
+          alt=""
+          onError={() => setLogoOk(false)}
+        />
+      )}
+    </span>
+  );
+}
+
 // A single leaderboard row — shared shape for parties and politicians.
-function Row({ rank, name, sub, color, s, t }) {
+function Row({ rank, name, sub, color, abbr, s, t }) {
   return (
     <li className={"lb-row" + (s.provisional ? " lb-row-provisional" : "")}>
       <span className="lb-rank">{rank}</span>
-      <span className="lb-swatch" style={{ background: color || "#1E3A5F" }} />
+      <PartyMark color={color} abbr={abbr} />
       <div className="lb-id">
         <span className="lb-name">{name}</span>
         {sub && <span className="lb-sub">{sub}</span>}
@@ -98,6 +120,7 @@ export default function LeaderboardModal({ open, promises, onClose }) {
                 name={r.party}
                 sub={r.abbr}
                 color={r.color}
+                abbr={r.abbr}
                 s={r}
                 t={t}
               />
@@ -108,6 +131,7 @@ export default function LeaderboardModal({ open, promises, onClose }) {
                 name={r.politician}
                 sub={[r.position, r.party].filter(Boolean).join(" · ")}
                 color={null}
+                abbr={null}
                 s={r}
                 t={t}
               />
