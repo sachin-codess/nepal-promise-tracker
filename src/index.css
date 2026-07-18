@@ -977,3 +977,35 @@ body {
 .ask-followups {
   margin-top: 4px;
 }
+
+/* ---------- Leaderboard (Accountability Scores) ---------- */
+.lb-modal { max-width: 640px; }
+.lb-intro { margin: 0.25rem 0 1rem; font-size: 0.88rem; color: #555; line-height: 1.45; }
+.lb-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+.lb-tab { padding: 0.35rem 0.9rem; border: 1px solid #ccc; border-radius: 999px; background: #fff; font-size: 0.85rem; cursor: pointer; }
+.lb-tab-active { background: #1E3A5F; border-color: #1E3A5F; color: #fff; }
+.lb-list { list-style: none; margin: 0; padding: 0; }
+.lb-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 0.25rem; border-bottom: 1px solid #eee; }
+.lb-row:last-child { border-bottom: none; }
+.lb-row-provisional { opacity: 0.55; }
+.lb-rank { flex: 0 0 1.6rem; font-weight: 700; font-size: 0.95rem; color: #888; text-align: center; }
+.lb-swatch { flex: 0 0 10px; width: 10px; height: 26px; border-radius: 3px; }
+.lb-id { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+.lb-name { font-weight: 600; font-size: 0.95rem; line-height: 1.2; }
+.lb-sub { font-size: 0.75rem; color: #777; margin-top: 1px; }
+.lb-metrics { flex: 0 0 auto; text-align: right; display: flex; flex-direction: column; gap: 2px; }
+.lb-score { line-height: 1; }
+.lb-score-num { font-size: 1.35rem; font-weight: 800; color: #1E3A5F; }
+.lb-score-max { font-size: 0.75rem; color: #999; margin-left: 1px; }
+.lb-secondary { display: flex; flex-direction: column; }
+.lb-resolution { font-size: 0.72rem; color: #555; }
+.lb-conf { font-size: 0.68rem; color: #888; }
+.lb-conf-high { color: #1B7A3D; }
+.lb-conf-medium { color: #C77D00; }
+.lb-conf-low { color: #999; }
+.lb-footnote { margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid #eee; font-size: 0.72rem; color: #888; line-height: 1.5; }
+@media (max-width: 480px) {
+  .lb-row { gap: 0.5rem; }
+  .lb-score-num { font-size: 1.15rem; }
+  .lb-name { font-size: 0.88rem; }
+}

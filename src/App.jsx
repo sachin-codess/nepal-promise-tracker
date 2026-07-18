@@ -14,6 +14,7 @@ import BudgetModal from "./components/BudgetModal";
 import ProjectsModal from "./components/ProjectsModal";
 import SubmitModal from "./components/SubmitModal";
 import AskModal from "./components/AskModal";
+import LeaderboardModal from "./components/LeaderboardModal";
 
 export default function App() {
   const [promises, setPromises] = useState([]);
@@ -31,6 +32,7 @@ export default function App() {
   const [showProjects, setShowProjects] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
   const [showAsk, setShowAsk] = useState(false);
+  const [showScores, setShowScores] = useState(false);
   const [projects, setProjects] = useState([]);
   const [milestones, setMilestones] = useState([]);
   const [projLoading, setProjLoading] = useState(true);
@@ -146,6 +148,9 @@ export default function App() {
           <button className="map-btn" onClick={() => setShowSubmit(true)}>
             {t("submitBtn")}
           </button>
+          <button className="map-btn" onClick={() => setShowScores(true)}>
+            {t("lbBtn")}
+          </button>
           <button className="analytics-btn" onClick={() => setShowAnalytics(true)}>
             {t("analytics")}
           </button>
@@ -244,6 +249,7 @@ export default function App() {
       />
       <SubmitModal open={showSubmit} onClose={() => setShowSubmit(false)} />
       <AskModal open={showAsk} onClose={() => setShowAsk(false)} promises={promises} />
+      <LeaderboardModal open={showScores} promises={promises} onClose={() => setShowScores(false)} />
     </div>
   );
 }
