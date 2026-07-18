@@ -987,7 +987,7 @@ body {
 .lb-list { list-style: none; margin: 0; padding: 0; }
 .lb-row { display: flex; align-items: center; gap: 0.85rem; padding: 0.7rem 0.25rem; border-bottom: 1px solid #eee; }
 .lb-row:last-child { border-bottom: none; }
-.lb-row-provisional { opacity: 0.55; }
+.lb-row-provisional { opacity: 0.8; }
 .lb-rank { flex: 0 0 1.6rem; font-weight: 700; font-size: 1.05rem; color: #888; text-align: center; }
 
 /* Bold party marker: a solid colour chip that reads like a flag tile.
@@ -1033,3 +1033,49 @@ body {
   .lb-score-num { font-size: 1.2rem; }
   .lb-name { font-size: 0.9rem; }
 }
+
+/* --- Clickable leaderboard rows --- */
+.lb-row-btn {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; padding: 10px 12px;
+  background: none; border: 0; border-radius: 10px;
+  font: inherit; color: inherit; text-align: left; cursor: pointer;
+  transition: background 0.15s ease;
+}
+.lb-row-btn:hover { background: rgba(30, 58, 95, 0.06); }
+.lb-row-btn:focus-visible { outline: 2px solid #1E3A5F; outline-offset: -2px; }
+.lb-row-chevron {
+  margin-left: 4px; font-size: 1.3rem; line-height: 1;
+  color: #9AA7B8; flex-shrink: 0;
+}
+.lb-row-btn:hover .lb-row-chevron { color: #1E3A5F; }
+.modal-overlay-behind { pointer-events: none; }
+.modal-overlay-behind .lb-modal { filter: brightness(0.92); }
+
+/* --- Politician portraits --- */
+.lb-face { overflow: hidden; }
+.lb-face-photo { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lb-face-initials {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%;
+  color: #fff; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.02em;
+}
+
+/* --- Confidence as a neutral data-quality ramp ---
+   Deliberately NOT red/green: those belong to Kept/Broken. Confidence is how
+   much we know, not how well they did. Slate-blue = well-evidenced,
+   amber-grey = partial, grey = thin. */
+.lb-conf {
+  display: inline-block;
+  padding: 1px 6px; border-radius: 999px;
+  font-size: 0.68rem; font-weight: 600;
+}
+.lb-conf-high { color: #2C4A6E; background: rgba(44, 74, 110, 0.10); }
+.lb-conf-medium { color: #7A6320; background: rgba(122, 99, 32, 0.10); }
+.lb-conf-low { color: #6B7280; background: rgba(107, 114, 128, 0.10); }
+
+/* Confidence: red/amber/green ink per Sachin's call (overrides the neutral ramp above) */
+.lb-conf { background: none; padding: 0; }
+.lb-conf-high { color: #1B7A3D; background: none; }
+.lb-conf-medium { color: #B8860B; background: none; }
+.lb-conf-low { color: #C62828; background: none; }

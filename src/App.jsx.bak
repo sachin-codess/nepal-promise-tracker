@@ -234,19 +234,6 @@ export default function App() {
       </footer>
 
       <AboutModal open={showAbout} onClose={() => setShowAbout(false)} />
-      {/* Rendered BEFORE PartyModal/PoliticianModal so that when a leaderboard row
-          is clicked, the stacked modal paints on top of the leaderboard rather
-          than under it. `stacked` also suppresses the leaderboard's own Escape
-          and backdrop-click handlers while a drill-in is open, so closing the
-          drill-in returns here instead of closing everything. */}
-      <LeaderboardModal
-        open={showScores}
-        promises={promises}
-        onClose={() => setShowScores(false)}
-        onSelectParty={setActiveParty}
-        onSelectPolitician={setActivePolitician}
-        stacked={Boolean(activeParty || activePolitician)}
-      />
       <PartyModal party={activeParty} promises={promises} onClose={() => setActiveParty(null)} />
       <PoliticianModal politician={activePolitician} promises={promises} onClose={() => setActivePolitician(null)} />
       <TimelineModal promise={timelinePromise} events={timelineEvents} onClose={() => setTimelinePromise(null)} />
@@ -262,6 +249,7 @@ export default function App() {
       />
       <SubmitModal open={showSubmit} onClose={() => setShowSubmit(false)} />
       <AskModal open={showAsk} onClose={() => setShowAsk(false)} promises={promises} />
+      <LeaderboardModal open={showScores} promises={promises} onClose={() => setShowScores(false)} />
     </div>
   );
 }

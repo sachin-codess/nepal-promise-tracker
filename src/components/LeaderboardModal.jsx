@@ -40,12 +40,60 @@ function PartyMark({ color, abbr }) {
   );
 }
 
+// Politician portrait, mirroring PartyMark's fallback contract exactly:
+// try /politician-photos/{slug}.jpg, and if the file isn't there the <img>
+// errors and we fall back to initials on the party colour. This means the
+// component is inert until photo files actually exist in /public — no photos,
+// no visual change, no broken-image icons.
+//
+// LICENSING: only drop in photos you have the right to host. Wikimedia Commons
+// portraits are the practical source, but each one's licence must be checked
+// individually and attributed where its licence requires it. This is a public
+// accountability site; an unlicensed press photo is a real liability.
+function PoliticianFace({ color, name }) {
+  const [photoOk, setPhotoOk] = useState(true);
+  const slug = name
+    ? name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
+    : null;
+  const src = slug ? `/politician-photos/${slug}.jpg` : null;
+  const initials = (name || "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
+  return (
+    <span className="lb-mark lb-face" style={{ background: color || "#5A6B8C" }}>
+      {src && photoOk ? (
+        <img
+          className="lb-face-photo"
+          src={src}
+          alt=""
+          onError={() => setPhotoOk(false)}
+        />
+      ) : (
+        <span className="lb-face-initials" aria-hidden="true">{initials}</span>
+      )}
+    </span>
+  );
+}
+
 // A single leaderboard row — shared shape for parties and politicians.
-function Row({ rank, name, sub, color, abbr, s, t }) {
+// The whole row is a button: seeing "Balen Shah 73/100" should let you drill
+// straight into the promises that produced it. The mark and the name are inside
+// the button, so clicking the logo/chip works too.
+function Row({ rank, name, sub, color, abbr, s, t, onSelect, face }) {
   return (
     <li className={"lb-row" + (s.provisional ? " lb-row-provisional" : "")}>
+      <button
+        type="button"
+        className="lb-row-btn"
+        onClick={onSelect}
+        aria-label={`${name} — ${s.score}/100`}
+      >
       <span className="lb-rank">{rank}</span>
-      <PartyMark color={color} abbr={abbr} />
+      {face ? <PoliticianFace color={color} name={name} /> : <PartyMark color={color} abbr={abbr} />}
       <div className="lb-id">
         <span className="lb-name">{name}</span>
         {sub && <span className="lb-sub">{sub}</span>}
@@ -66,20 +114,26 @@ function Row({ rank, name, sub, color, abbr, s, t }) {
           </span>
         </div>
       </div>
+      <span className="lb-row-chevron" aria-hidden="true">›</span>
+      </button>
     </li>
   );
 }
 
-export default function LeaderboardModal({ open, promises, onClose }) {
+export default function LeaderboardModal({ open, promises, onClose, onSelectParty, onSelectPolitician, stacked }) {
   const t = useT();
   const [tab, setTab] = useState("parties");
 
+  // Escape closes the leaderboard — but NOT while a party/politician modal is
+  // stacked on top of it. Those modals bind their own Escape handler, so without
+  // this guard one keypress would close both and dump the user back to the grid
+  // instead of back to the leaderboard they came from.
   useEffect(() => {
-    if (!open) return;
+    if (!open || stacked) return;
     const onKey = (e) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  }, [open, stacked, onClose]);
 
   useEffect(() => { if (open) setTab("parties"); }, [open]);
 
@@ -91,7 +145,10 @@ export default function LeaderboardModal({ open, promises, onClose }) {
   const rows = tab === "parties" ? parties : politicians;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div
+      className={"modal-overlay" + (stacked ? " modal-overlay-behind" : "")}
+      onClick={stacked ? undefined : onClose}
+    >
       <div
         className="modal lb-modal"
         role="dialog"
@@ -133,6 +190,7 @@ export default function LeaderboardModal({ open, promises, onClose }) {
                 abbr={r.abbr}
                 s={r}
                 t={t}
+                onSelect={() => onSelectParty(r.party)}
               />
             ) : (
               <Row
@@ -142,8 +200,10 @@ export default function LeaderboardModal({ open, promises, onClose }) {
                 sub={[r.position, r.party].filter(Boolean).join(" · ")}
                 color={r.color}
                 abbr={null}
+                face
                 s={r}
                 t={t}
+                onSelect={() => onSelectPolitician(r.politician)}
               />
             )
           )}
