@@ -2,6 +2,10 @@
 // Everything a dashboard needs in one call: totals and breakdowns.
 
 import { db, ok, fail, guard } from "../_lib/db.js";
+// Imported from the frontend lib on purpose: one formula, one file. If the
+// weights ever change, the browser leaderboard and this endpoint move together.
+// scoring.js is pure functions over plain rows — no React, no network.
+import { partyLeaderboard, politicianLeaderboard } from "../../src/lib/scoring.js";
 
 function tally(rows, field) {
   const out = {};
@@ -18,7 +22,7 @@ export default async function handler(req, res) {
 
   const { data: promises, error } = await db
     .from("promises_full")
-    .select("status, category, party, politician, province");
+    .select("status, category, party, party_abbr, party_color, politician, position, province, deadline_status");
   if (error) return fail(res, 500, error.message);
 
   const { data: projects } = await db
@@ -50,6 +54,12 @@ export default async function handler(req, res) {
       by_category: tally(rows, "category"),
       by_party: tally(rows, "party"),
       by_province: tally(rows, "province"),
+    },
+    // Ranked leaderboards, same numbers the site shows — citable without
+    // scraping the page or rerunning the maths.
+    leaderboards: {
+      parties: partyLeaderboard(rows),
+      politicians: politicianLeaderboard(rows),
     },
     politicians_tracked: new Set(rows.map((r) => r.politician).filter(Boolean)).size,
     parties_tracked: new Set(rows.map((r) => r.party).filter(Boolean)).size,
